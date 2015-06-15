@@ -1,0 +1,118 @@
+#people {
+height: 500px;
+width: 50%;
+}
+
+#home {
+display:inline-block;
+padding-left:5px;
+}
+
+
+h1#title {
+margin-top: -10px;
+text-align: center;
+}
+
+
+#information {
+margin-top: -10px;
+}
+
+#songinfo {
+display: inline-block;
+margin-left: 20px;
+float: left;
+width: 47%;
+height: 480px;
+}
+
+#songs {
+height: inherit;
+background-color: whitesmoke;
+}
+
+
+
+#songinfo pre {
+font-size: 16px;
+height: inherit;
+overflow: auto;
+}
+
+h3#songinfo_title {
+display: inline-block;
+width: 100%;
+text-align: center;
+}
+
+#recommends {
+display: inline-block;
+margin-right: 20px;
+float: right;
+width: 47%;
+height: 480px;
+}
+
+h3#recommendations_title {
+display: inline-block;
+width: 100%;
+text-align: center;
+}
+
+#recommendations {
+height: inherit;
+background-color: whitesmoke;
+}
+
+#recommendations pre {
+font-size: 18px;
+height: inherit;
+overflow: auto;
+}
+
+h3.title {
+width: 100%
+text-align: center;
+display: inline-block;
+}
+
+#recommend {
+display: inline-block;
+float:right;
+margin-top:80px;
+ }
+
+.formfield{
+display: inline-block;
+}
+
+#numberform.formfield{
+margin-top:20px;
+margin-right: 80px;
+}
+
+#recommend #id.formfield{
+margin-top: 20px;
+margin-right: 70px;
+}
+
+#footer{
+margin-top: 30px;
+margin-left: 20px;
+display: inline-block;
+float: left;
+margin-bottom: 10px;
+}
+
+#addin{
+display: inline-block;
+float: left;
+margin-left: 20px;
+margin-top: 100px;
+width: 50%
+}
+
+#addin #id.formfield{
+}
+
