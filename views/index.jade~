@@ -2,10 +2,10 @@ extends layout
 
 block content
     h1#title Database Project
-    div#recommend
+    div#test
             form(action='/test',method='post')           
                 div(data-role='fieldcontain')
-                    input(type='button',id='testbutton', value='Recommend', data-transition='fade', data-theme='c')
+                    input(type='button',id='testbutton', class='center', value='Test Database', data-transition='fade', data-theme='c')
     div#people
 
 
