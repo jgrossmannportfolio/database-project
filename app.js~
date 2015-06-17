@@ -38,6 +38,7 @@ var views = require('./views.js');
 app.get('/', views.index);
 app.get('/recommendations', views.recommendations);
 app.get('/addin', views.reset_addin);
+app.get('/test', views.test);
 
 //store song information to memory
 //database.init_song_info();

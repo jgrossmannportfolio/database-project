@@ -28,20 +28,14 @@ app.configure(function() {
 
 // set up socket.io routes
 var database = require('./database.js');
-app.io.route('recommend', database.recommend);
-app.io.route('add_preference', database.add_preference);
 app.io.route('test_database', database.test_database);
 
 
 // set up "normal" http routes
 var views = require('./views.js');
 app.get('/', views.index);
-app.get('/recommendations', views.recommendations);
-app.get('/addin', views.reset_addin);
 app.get('/test', views.test);
 
-//store song information to memory
-//database.init_song_info();
 
 app.listen(port);
 console.log("App started on port " + port);
