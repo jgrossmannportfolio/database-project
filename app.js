@@ -39,6 +39,8 @@ app.get('/#', views.index);
 app.get('/test', views.test);
 app.get('/home', views.index);
 app.get('/wishlist', views.wishlist);
+app.get('/gift', views.gift);
+app.get('/settings', views.settings);
 
 
 app.listen(port);

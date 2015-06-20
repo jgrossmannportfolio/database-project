@@ -39,6 +39,9 @@ html
                     li 
                         a(href='#') Drafts
                     li
-                        a(href='#') Sent Items      
+                        a(href='#') Sent Items  
+                    li(class='divider')
+                    li
+                        a(href='#') Settings    
             
     block content

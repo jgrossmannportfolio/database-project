@@ -38,8 +38,8 @@ app.get('/', views.index);
 app.get('/#', views.index);
 app.get('/test', views.test);
 app.get('/home', views.index);
+app.get('/wishlist', views.wishlist);
 
 
 app.listen(port);
 console.log("App started on port " + port);
-database.getUsers();
