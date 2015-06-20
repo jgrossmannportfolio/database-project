@@ -15,9 +15,32 @@ text-align: center;
 }
 
 h1#title {
-margin-top: -10px;
 text-align: center;
 }
 
+#navbar {
+background-color: #CCE1F3;
+font-size: 22;
+}
 
+.nav.nav-pills a {
+color: blue;
+}
+
+#hello {
+font-size: 36;
+font-weight: bold;
+max-width: 60%;
+display: inline-block;
+margin-left: 10px;
+}
+
+#header form {
+float: right; 
+}
+
+#Select-User {
+margin-top: 15px;
+margin-right: 40px;
+}
 

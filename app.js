@@ -29,12 +29,16 @@ app.configure(function() {
 // set up socket.io routes
 var database = require('./database.js');
 app.io.route('test_database', database.test_database);
+app.io.route('Change User', database.setCurrentUser);
 
 
 // set up "normal" http routes
 var views = require('./views.js');
 app.get('/', views.index);
+app.get('/#', views.index);
 app.get('/test', views.test);
+app.get('/home', views.index);
+app.get('/wishlist', views.wishlist);
 
 
 app.listen(port);

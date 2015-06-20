@@ -4,12 +4,44 @@ html
     script(src='/javascripts/jquery-2.1.0.min.js')
     script(src='/socket.io/socket.io.js')
     script(src='/javascripts/appclient.js')
-    link(href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css", rel="stylesheet")
-    link(href="/css/app.css", rel="stylesheet")
-    script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js")
+    link(href='http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css', rel='stylesheet')
+    link(href='/css/app.css', rel='stylesheet')
+    script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js')
 
   body
     #header
-        p Hello, #{user}
-
+        p#hello #{headerPhrase}
+        form
+            div(class='btn-group' id='Select-User')
+                button(type='button' data-toggle='dropdown' class='btn btn-default dropdown-toggle') #{user} 
+                    span(class='caret')
+                ul(class='dropdown-menu pull-right')
+                    each person in users
+                        li
+                            a(href='#')= person.email
+                    li(class='divider')
+                    li
+                        a(href='#') Add New User
+    div#navbar
+        ul(class='nav nav-pills')
+            li(class='active') 
+                a(href='/') Home
+            li 
+                a(href='#') Wish
+            li
+                a(href='#') Gift
+            li(class='dropdown')
+                a(href='#' data-toggle='dropdown' class='dropdown-toggle') Settings
+                    b(class='caret')
+                ul(class='dropdown-menu')
+                    li
+                        a(href='#') Inbox    
+                    li 
+                        a(href='#') Drafts
+                    li
+                        a(href='#') Sent Items  
+                    li(class='divider')
+                    li
+                        a(href='#') Settings    
+            
     block content
