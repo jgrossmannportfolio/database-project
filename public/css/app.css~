@@ -32,6 +32,7 @@ font-size: 36;
 font-weight: bold;
 max-width: 60%;
 display: inline-block;
+margin-left: 10px;
 }
 
 #header form {
@@ -41,5 +42,14 @@ float: right;
 #Select-User {
 margin-top: 15px;
 margin-right: 40px;
+}
+
+#project-info {
+margin-left: 10px;
+margin-right: 10px;
+}
+
+#description {
+
 }
 

@@ -1,13 +1,11 @@
 extends layout
 
 block content
-    h1#title Database Project
+    div#project-info
+        h3#title COMS4111 - Project 1, Part 3
+        p#description This project will allow users to set up an online 'wishlist,' and share that list with their social network. Their friends will each be able to see the list, purchase gifts from the list for the user, and see when another friend has purchased a gift on the list. The friendships are mono-directional, more in line with Twitter 'follows' than with Facebook 'friending.' This allows for institutions and charities to set up 'wishlists.' The user will not be able to see what has been purchased for her by her friends. This will act, in effect, as a baby or wedding registry, but will not be confined to one event, or locked to one vendor. (The project does allow for events to be set up by each user, but they are not mandatory). Vendors will be able to post sales on specific items, which may be directed at individual users. The database will also contain payment information and shipping information. This is constrained in such a way that every payment method is tied to an address, and every address is tied to at least one user. A user may sign up without payment or address information if, for instance, they only want to see what their friends want.
     
-    div#test.center
-            form(action='/test')           
-                div(data-role='fieldcontain')
-                    input(type='button',id='testbutton', class='center', value='Test Database', data-transition='fade', data-theme='c')
-    div#people.center
+    
 
 
                     
