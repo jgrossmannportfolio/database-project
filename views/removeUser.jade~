@@ -11,7 +11,7 @@ block content
         tbody
             each person in users
                 tr
-                    td= person.email
+                    td.email= person.email
                     td= person.name
                     td= person.age
     button(type='button' class='btn btn-primary' id='remove-user') Remove

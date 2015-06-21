@@ -1,0 +1,21 @@
+extends layout
+
+block content
+
+    table.table#additem
+        thead
+            tr
+                th Item
+                th Age Restriction
+                th Quantity
+                
+        tbody
+            each item in items
+                tr
+                    td= item.name
+                    td= item.min_age
+                    td
+                        input(type='number' name='quantity' min='1' max='999' value='1' class='quantity')
+                        input(type='hidden' value=item.upc class='hidden')
+                    td
+                        button(type='button') Add Item

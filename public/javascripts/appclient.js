@@ -46,6 +46,25 @@ var myapp = (function(){
         });
     }
 
+    var addItem = function() {
+        console.log("add item");
+        //var parent = $(this).parent().parent();
+        var parent = $(this).parent().parent().find("td.item");
+        var upc = $(parent).find(".hidden").attr("value");
+        var quant = $(parent).find(".quantity").prop("value");
+        socket.emit("Add Item", {upc:upc, quant:quant});
+    }
+
+    socket.on('Added Item', function(req) {
+        console.log("added item");
+        console.log(req);
+        console.log(req.alert);
+        if(req.alert) {
+            alert(req.alert);
+        }
+        window.location.href = "/wishlist";
+    });
+
     
     return {
         init: function() {
@@ -54,6 +73,7 @@ var myapp = (function(){
             jQuery("#Select-User a").click(changeUser);
             jQuery("#remove-table tr").click(selectRemoveUser);
             jQuery("button#remove-user").click(removeUsers);
+            jQuery("#additem button").click(addItem);
             jQuery("#newuser-form").validate({
                 rules: {
                     email1: {

@@ -23,6 +23,13 @@ function Person(email, name, age) {
     this.age = age;
 }
 
+function Want(email, upc, event_id, quant) {
+    this.email = email;
+    this.upc = upc;
+    this.event_id = event_id;
+    this.quant = quant;
+}
+
 
 var test_database = function(req) {
 	//db.connect();
@@ -141,11 +148,70 @@ var removeUsers = function(data, callback) {
         });
     }
     if(i == data.length) {
-        callback(error, rows);
+        callback(error);
     }
 }   
 exports.removeUsers = removeUsers;
 
+var getUserEvents = function(email, callback) {
+    db.query('Select * FROM Event WHERE email = ?', email, function(err, rows) {
+        if (err) {
+            console.log('Error while performing Query.');
+            callback(err, null);
+            return;
+            
+		} else {
+			callback(null, rows);
+            return;
+		}
+    });
+}
+exports.getUserEvents = getUserEvents;
+
+var getEventItems = function(eventId, callback) {
+    db.query('Select * FROM wants W, Item I WHERE W.upc = I.upc AND W.event_id = ?', eventId, function(err, rows) {
+        if (err) {
+            console.log('Error while performing Query.');
+            callback(err, null);
+            return;
+            
+		} else {
+			callback(null, rows);
+            return;
+		}
+    });
+}
+exports.getEventItems = getEventItems;
+
+var getAllItems = function(callback) {
+    db.query('Select * FROM Item', function(err, rows) {
+        if(err) {
+            console.log('Error while performing query');
+            callback(err, null);
+            return;
+        } else {
+            callback(null, rows);
+            return;
+        }
+    });
+}
+exports.getAllItems = getAllItems;
+
+var addItem = function(req) {
+    var want = new Want(currentUser.email, req.data.upc, req.data.event_id, req.data.quant);
+    var upc = req.data.upc;
+    var quant = req.data.quant;
+    var event_id = req.data.event_id;
+    db.query('INSERT INTO wants set ?', want, function(err, rows) {
+        if(err) {
+            console.log('Query Error');
+            socket.emit('Added Item', {alert:""+err});
+        }else {
+            socket.emit('Added Item', {});
+        }
+    });
+}
+exports.addItem = addItem;
 
 
 

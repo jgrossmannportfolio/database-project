@@ -2,35 +2,38 @@ extends layout
 
 block content
     div.navspacer
-    button(type='button' class='btn btn-default')
+    button(type='button' class='btn btn-default' id='new-event') Add Event To Wishlist
     div#wishlist
         b#user  I'm wishing for:
 
         #accordion.panel-group
-            .panel.panel-default
-                .panel-heading
-                    h4.panel-title
-                        a(data-toggle='collapse', data-parent='#accordion', href='#collapse1')
-                            | Collapsible Group 1
-                |     
-                #collapse1.panel-collapse.collapse
-                    .panel-body
-                        | Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                        | sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-                        | minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-                        | commodo consequat.
-            | 
-            .panel.panel-default
-                .panel-heading
-                    h4.panel-title
-                        a(data-toggle='collapse', data-parent='#accordion', href='#collapse2')
-                            | General
-                |     
-                #collapse2.panel-collapse.collapse
-                    .panel-body
-                    | Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                    | sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-                    | minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-                    | commodo consequat.
-            |   
+            each event in events
+                - var id = event.event_id;
+                .panel.panel-default
+                    .panel-heading
+                        h4.panel-title
+                            a(data-toggle='collapse', data-parent='#accordion', href='#collapse1')
+                                | #{event.e_name} 
+                            .date-range #{event.date_start} to #{event.date_end}
+                    |    
+                    #collapse1.panel-collapse.collapse
+                        .panel-body
+                            - var items = eventItems[id]
+                                table.table
+                                    thead
+                                        tr
+                                            th Item
+                                            th Quantity
+                                            th Age Restriction
+                                            
+                                    tbody
+                                        each item in items
+                                            tr
+                                                td= item.name
+                                                td= item.quant
+                                                td= item.min_age
+                                                td 
+                                                    button(type='button' class='item-remove') Remove
+                                 button(type='button' class='add-item') Add Item To List   
+                                       
     
