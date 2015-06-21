@@ -1,10 +1,35 @@
 extends layout
 
 block content
-    h1#title Database Project
-    
-    div#test.center
-            form(action='/test')           
-                div(data-role='fieldcontain')
-                    input(type='button',id='testbutton', class='center', value='Test Database', data-transition='fade', data-theme='c')
-    div#people.center
+    div.navspacer
+    div#gift
+        b.giftBold#user #{user}
+        b  is wishing for:
+
+        #accordion.panel-group
+            .panel.panel-default
+                .panel-heading
+                    h4.panel-title
+                        a(data-toggle='collapse', data-parent='#accordion', href='#collapse1')
+                            | Collapsible Group 1
+                |     
+                #collapse1.panel-collapse.collapse
+                    .panel-body
+                        | Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+                        | sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+                        | minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+                        | commodo consequat.
+            | 
+            .panel.panel-default
+                .panel-heading
+                    h4.panel-title
+                        a(data-toggle='collapse', data-parent='#accordion', href='#collapse2')
+                            | General
+                |     
+                #collapse2.panel-collapse.collapse
+                    .panel-body
+                    | Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+                    | sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+                    | minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+                    | commodo consequat.
+            |   

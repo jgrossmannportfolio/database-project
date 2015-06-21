@@ -1,0 +1,17 @@
+extends layout
+
+block content
+    h4 Click on the users you want to remove. Then, click the "Remove" button at the bottom of the page to remove all the users you selected.
+    table.table.table-hover.table-bordered#remove-table
+        thead
+            tr
+                th Email
+                th Name
+                th Age
+        tbody
+            each person in users
+                tr
+                    td.email= person.email
+                    td= person.name
+                    td= person.age
+    button(type='button' class='btn btn-primary' id='remove-user') Remove

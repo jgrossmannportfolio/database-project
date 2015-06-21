@@ -22,12 +22,73 @@ var myapp = (function(){
         window.location.href = "/wishlist";
     });
 
+    var selectRemoveUser = function() {
+        var element = $(this);
+        if(element.hasClass("selected")) {
+            element.removeClass("selected");
+        }else {
+            element.addClass("selected");
+        }
+    }
 
+    var removeUsers = function() {
+        console.log("inside remove users");
+        var users = [];
+        $("#remove-table tr.selected td.email").each(function() {
+            users.push($(this).text());
+        });
+       
+        $.post("/remove-user", {users:users}, function(data) {
+            console.log("post is done");
+            alert(data);
+            window.location = "/remove-user";
+            return;
+        });
+    }
+
+    
     return {
         init: function() {
             //console.log("Client-side app starting up")
 			jQuery("#testbutton").click(test);
             jQuery("#Select-User a").click(changeUser);
+            jQuery("#remove-table tr").click(selectRemoveUser);
+            jQuery("button#remove-user").click(removeUsers);
+            jQuery("#newuser-form").validate({
+                rules: {
+                    email1: {
+                        minlength: 2,
+                        required: true
+                    },
+                    email2: {
+                        minlength: 4,
+                        required: true
+                    },
+                    name: {
+                        minlength: 1,
+                        required: true
+                    },
+                    age: {
+                        minlength: 1,
+                        maxlength: 2,
+                        required: true,
+                        number: true
+                    }
+                },
+                errorPlacement: function(error, element) {
+                    element.parent().after(error);
+                },
+                highlight: function(element) {
+                    $("#newuser-form button").attr("type", "");
+                    $(element).removeClass('success').addClass('error');
+                },
+                success: function(label) {
+                    $(label).remove();
+                    if($("input").hasClass("error") == false) {
+                        $("#newuser-form button").attr("type", "submit");
+                    }
+                }
+            });
         }
     }
 })();

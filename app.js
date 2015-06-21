@@ -13,17 +13,20 @@ if (process.env.PORT) {
 console.log("Using baseurl: " + baseurl);
 console.log("Port: " + port);
 
+var flash = require('connect-flash');
 app.configure(function() {
   app.set('view engine', 'jade');
   app.set('views', __dirname + '/views');
   app.use(express.logger());
-  app.use(express.cookieParser());
+  app.use(express.cookieParser('keyboard cat'));
   app.use(express.json());
   app.use(express.urlencoded());
   app.use(express.methodOverride());
-  app.use(express.session({secret: 'secretkeywhichmustnotbenamed'}));
+  app.use(express.session({cookie: { maxAge: 60000 }, secret: 'secretkeywhichmustnotbenamed'}));
+  app.use(flash());
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
+  
 });
 
 // set up socket.io routes
@@ -41,6 +44,11 @@ app.get('/home', views.index);
 app.get('/wishlist', views.wishlist);
 app.get('/gift', views.gift);
 app.get('/settings', views.settings);
+app.get('/new-user', views.newUser);
+app.get('/remove-user', views.removeUser);
+
+app.post('/new-user', views.createNewUser);
+app.post('/remove-user', views.deleteUsers);
 
 
 app.listen(port);

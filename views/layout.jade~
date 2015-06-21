@@ -7,7 +7,13 @@ html
     link(href='http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css', rel='stylesheet')
     link(href='/css/app.css', rel='stylesheet')
     script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js')
-
+    script(src='http://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.0/jquery.validate.js')
+    
+    if alert != null
+      if alert != ""
+        script.
+          alert("#{alert}")
+            
   body
     #header
         p#hello #{headerPhrase}
@@ -15,33 +21,51 @@ html
             div(class='btn-group' id='Select-User')
                 button(type='button' data-toggle='dropdown' class='btn btn-default dropdown-toggle') #{user} 
                     span(class='caret')
-                ul(class='dropdown-menu pull-right')
+                ul(class='dropdown-menu pull-right scrollable-menu')
                     each person in users
                         li
                             a(href='#')= person.email
                     li(class='divider')
                     li
-                        a(href='#') Add New User
+                        a(href='/new-user') Add New User
+                    li 
+                        a(href='/remove-user') Remove User
     div#navbar
         ul(class='nav nav-pills')
-            li(class='active') 
-                a(href='/') Home
-            li 
-                a(href='#') Wish
-            li
-                a(href='#') Gift
-            li(class='dropdown')
-                a(href='#' data-toggle='dropdown' class='dropdown-toggle') Settings
-                    b(class='caret')
-                ul(class='dropdown-menu')
-                    li
-                        a(href='#') Inbox    
-                    li 
-                        a(href='#') Drafts
-                    li
-                        a(href='#') Sent Items  
-                    li(class='divider')
-                    li
-                        a(href='#') Settings    
+            if home
+                li
+                    a(href='/new-user') Add User
+                li 
+                    a(href='/remove-user') Remove User
+            else if newuser
+                li
+                    a(href='/') Home
+                li 
+                    a(href='/remove-user') Remove User
+            else if removeuser
+                li
+                    a(href='/') Home
+                li
+                    a(href='/new-user') Add User
+            else
+                li(class='active') 
+                    a(href='/') Home
+                li 
+                    a(href='/wishlist') Wish
+                li
+                    a(href='/gift') Gift
+                li(class='dropdown')
+                    a(href='#' data-toggle='dropdown' class='dropdown-toggle') Settings
+                        b(class='caret')
+                    ul(class='dropdown-menu')
+                        li
+                            a(href='/settings') Inbox    
+                        li 
+                            a(href='/settings') Drafts
+                        li
+                            a(href='/settings') Sent Items  
+                        li(class='divider')
+                        li
+                            a(href='/settings') Settings    
             
     block content

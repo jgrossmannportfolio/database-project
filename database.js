@@ -19,7 +19,7 @@ var temp = "";
 
 function Person(email, name, age) {
     this.email = email;
-    this.fullName = name;
+    this.name = name;
     this.age = age;
 }
 
@@ -52,12 +52,15 @@ exports.getTestData = getTestData;
 
 var getAllUsers = function(callback) {
     var users = null;
-     db.query('SELECT * from Person', function(err, rows, fields) {
+    console.log("database: getting users");
+    db.query('SELECT * from Person', function(err, rows, fields) {
 		if (!err) {
             callback(null, rows);
+            return;
 		} else {
 			console.log('Error while performing Query.');
             callback(err, null);
+            return;
 		}
 	});
 }
@@ -70,6 +73,7 @@ var getCurrentUser = function(callback) {
         callback(new Error("no current user"), null);
     }else {
         callback(null, currentUser);
+        return;
     }
 }
 exports.getCurrentUser = getCurrentUser;
@@ -98,6 +102,49 @@ var setCurrentUser = function(req) {
     
 }
 exports.setCurrentUser = setCurrentUser;
+
+var createNewUser = function(req, callback) {
+    var user = new Person(req.email1+"@"+req.email2, req.name, req.age);
+    db.query('INSERT INTO Person set ?', user, function(err, rows) {
+		if (err) {
+            console.log(err);
+            callback(err, null);
+		} else {
+            console.log(rows);
+            callback(null, rows);
+		}
+	});
+}
+exports.createNewUser = createNewUser;
+
+var removeUsers = function(data, callback) {
+    var error = null;
+    for(i=0; i<data.length; i++) {
+        db.query('DELETE FROM Person where email = ?', data[i], function(err, rows) {
+            if (err) {
+                console.log(err);
+                if(error != null) {
+                    error = error + "\n"+err;
+                }else {
+                    error = ""+err;
+                }
+                /*if(i === (data.length - 1)) {
+                    callback(error, null);
+                    return;
+                }*/
+		    } else {
+                /*if(i === (data.length - 1)) {
+                    callback(error, rows);
+                    return;
+                }*/
+		    }
+        });
+    }
+    if(i == data.length) {
+        callback(error);
+    }
+}   
+exports.removeUsers = removeUsers;
 
 
 

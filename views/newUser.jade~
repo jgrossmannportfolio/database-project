@@ -1,0 +1,21 @@
+extends layout
+
+block content
+    h1#title Database Project
+    form(id='newuser-form' action='/new-user' method='POST')
+        label(for="email") Email
+        .input-group
+            input(type='text' class='form-control error' placeholder='userxyz' aria-describedby='basic-addon2' name='email')
+            span(class='input-group-addon' id='basic-addon2') @
+            input(type='text' class='form-control error' placeholder='example.com' aria-describedby='basic-addon2' name='email2')
+        br
+        label(for="name") Full Name
+        .input-group
+            input(type='text' class='form-control error' placeholder='John Smith' name='name')
+        br
+        label(for="age") Age
+        .input-group
+            input(type='text' class='form-control error' placeholder='1-99' name='age')
+            span(class='input-group-addon') .00
+        br
+        button(type='' class='btn btn-primary') Submit
