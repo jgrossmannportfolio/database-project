@@ -65,6 +65,10 @@ var myapp = (function(){
         window.location.href = "/wishlist";
     });
 
+    var navSelect = function() {
+        $(this).parent().addClass('active');
+    };
+
     
     return {
         init: function() {
@@ -75,6 +79,10 @@ var myapp = (function(){
             jQuery("button#remove-user").click(removeUsers);
             jQuery("#additem button").click(addItem);
             jQuery('#datepicker').datepicker();
+            jQuery('#navbar a').filter(function() {
+                return this.href == window.location;
+            }).parent().addClass('active');
+            jQuery("#navbar a.dropdown-toggle").click(navSelect);
             $(function() {
                 $( "#from" ).datepicker({
                   defaultDate: "+1w",

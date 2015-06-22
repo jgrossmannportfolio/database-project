@@ -40,7 +40,6 @@ app.io.route('Add Item', database.addItem);
 var views = require('./views.js');
 app.get('/', views.index);
 app.get('/#', views.index);
-app.get('/test', views.test);
 app.get('/home', views.index);
 app.get('/wishlist', views.wishlist);
 app.get('/gift', views.gift);
@@ -58,6 +57,7 @@ app.post('/removeItem', views.removeItem);
 app.post('/new-event', views.newEvent);
 app.post('/addfriend', views.addFriend);
 app.post('/removefriend', views.removeFriend);
+app.post('/gift', views.giftItem);
 
 
 app.listen(port);

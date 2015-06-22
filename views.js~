@@ -21,6 +21,7 @@ exports.index = function (req, res) {
     });
 };
 
+
 function getUserData(otherCallBack) {
     async.parallel({
         users:   function(callback) {
@@ -144,7 +145,17 @@ exports.gift = function(req, res) {
             user = data.user.name;
             phrase = "Hello, "+user;
             users = data.users;
-            res.render('gift', {title: "Database Project", user:user, users:users, headerPhrase:phrase, alert:req.flash("alert")});
+            database.getFriendData(function(err, friendEventItems, friendHash, eventHash) {
+                if(err) {
+                    console.log(err);
+                    req.flash("alert", ""+err);
+                    res.redirect("/");
+                }else {
+                    res.render('gift', {title: "Database Project", user:user, users:users, friendEventItems:friendEventItems, 
+                                                friendHash:friendHash, eventHash:eventHash, headerPhrase:phrase, alert:req.flash("alert")}); 
+                }             
+            });
+            
         }
     });
 }
@@ -379,10 +390,29 @@ exports.addFriend = function(req, res) {
     
 }
 
+exports.removeFriend = function(req, res) {
+    var wanter = req.body.email;
+    database.removeFriend(wanter, function(err, data) {
+        if(err) {
+            console.log(err);
+            req.flash("alert", ""+err);
+            res.redirect("/friends");
+        }else {
+            req.flash("alert", "Successfully Removed Friend");
+            res.redirect("/friends");
+        }
+    });
+}   
 
-exports.test = function(req, res) {
-	var data = database.getTestData();
-	res.render('people', {people:data});
-}
-
+exports.giftItem = function(req, res) {
+    console.log(req.body);
+    var wanter = req.body.email;
+    var upc = req.body.upc;
+    var event_id = req.body.event_id;
+    var quantity = req.body.quantity;
+    if(event_id == "General") {
+        event_id = null;
+    }
+    res.redirect("/gift");
+};
 

@@ -1,6 +1,8 @@
-var userhash = { };
+var async = require('async');
 var next_anonymous = 1; 
 var HOME = __dirname+"/../";
+var util = require("util");
+var encode = require("hashcode").hashCode;
 
 var mysql = require('mysql');
 var db = mysql.createConnection({
@@ -176,7 +178,7 @@ var getUserEvents = function(email, callback) {
             
 		} else {
             console.log("events no error");
-			callback(null, rows);
+			callback(null, rows, email);
             return;
 		}
     });
@@ -243,7 +245,7 @@ var getUserGeneralItems = function(email, callback) {
             console.log(err);
             callback(err, null);
         }else {
-            callback(null, rows);
+            callback(null, rows, email);
         }
     });
 }
@@ -333,4 +335,101 @@ var removeFriend = function(wanter, callback) {
     });
 }
 exports.removeFriend = removeFriend;
+
+
+var getFriendData = function(otherCallBack) {
+    async.waterfall([
+        function(callback) {
+            getFriends(function(err, friends) {
+                if(err) {
+                    callback(err, null);
+                }else {
+                    console.log(friends);
+                    callback(null, friends);
+                }
+            });
+        },
+    
+        function(friends, callback) {
+            console.log("friends in 2: "+friends);
+            var friendEventItems= {};
+            var friendHash = {};
+            var eventHash = {};
+            async.forEach(friends, function(friend, callback) {
+                friend.hash = encode().value(friend.email);
+                friendHash[friend.email] = {name: friend.name, hash: friend.hash};
+                getUserGeneralItems(friend.email, function(err, items) {
+                    friendEventItems[friend.email] = {};
+                    if(err) {
+                        callback(err);
+                    }else {
+                        friendEventItems[friend.email].General = items;
+                        eventHash.General = 'General';
+                        console.log("Got general items: "+items);
+                        getUserEvents(friend.email, function(err, events) {
+                            if(err) {
+                                callback(err);
+                            }else {
+                                async.forEach(events, function(event, callback) {
+                                    getEventItems(event.event_id, function(err, items) {
+                                        if(err) {
+                                            callback(err);
+                                        }else {
+                                            console.log("got event items: "+items);
+                                            eventHash[event.event_id] = event.e_name;
+                                            friendEventItems[friend.email][event.event_id] = items;
+                                            callback();
+                                        }
+                                    });
+                                }, function(err) {
+                                    if(err) {
+                                        callback(err);
+                                    }else {
+                                        callback();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }, function(err) {
+                if(err) {
+                    callback(err);
+                }else {
+                    callback(null, friendEventItems, friendHash, eventHash);
+                }
+            });
+        }
+    ], function(err, friendEventItems, friendHash, eventHash) {
+            console.log(util.inspect(friendEventItems, false, null));
+            if(err) {
+                console.log(err);
+            }
+            otherCallBack(err, friendEventItems, friendHash, eventHash);
+        });
+}
+exports.getFriendData = getFriendData;
+
+var getFriendEmailHash = function(callback) {
+    friendHash = {};
+    getFriends(function(err, friends) {
+        if(err) {
+            console.log(err);
+            callback(err, null);
+        }else {
+            async.forEach(friends, function(friend, callback) {
+                
+                callback();
+            }, function(err) {
+                console.log(util.inspect(friendHash, false, null));
+                callback(null, friendHash);
+            });
+        }
+    });
+}
+exports.getFriendEmailHash = getFriendEmailHash;
+
+
+                    
+                        
 

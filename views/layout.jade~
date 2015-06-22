@@ -51,9 +51,9 @@ html
                 li
                     a(href='/new-user') Add User
             else
-                li(class='active') 
+                li
                     a(href='/') Home
-                li 
+                li
                     a(href='/wishlist') Wish
                 li
                     a(href='/gift') Gift
@@ -62,13 +62,13 @@ html
                         b(class='caret')
                     ul(class='dropdown-menu')
                         li
-                            a(href='/settings') Order History    
+                            a(href='') Order History    
                         li 
-                            a(href='/settings') Payment Information
+                            a(href='') Payment Information
                         li
-                            a(href='/settings') Shipping Addresses
+                            a(href='') Shipping Addresses
                         li
-                            a(href='/settings') Friends  
+                            a(href='/friends') Friends  
                         li(class='divider')
                         li
                             a(href='/settings') Settings    

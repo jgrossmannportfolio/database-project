@@ -3,34 +3,50 @@ extends layout
 block content
     div.navspacer
     div#gift
-        b.giftBold#user #{user}
-        b  is wishing for:
-        br
-
-        #accordion.panel-group
-            .panel.panel-default
-                .panel-heading
-                    h4.panel-title
-                        a(data-toggle='collapse', data-parent='#accordion', href='#collapse1')
-                            | Collapsible Group 1
-                |     
-                #collapse1.panel-collapse.collapse
-                    .panel-body
-                        | Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                        | sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-                        | minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-                        | commodo consequat.
-            | 
-            .panel.panel-default
-                .panel-heading
-                    h4.panel-title
-                        a(data-toggle='collapse', data-parent='#accordion', href='#collapse2')
-                            | General
-                |     
-                #collapse2.panel-collapse.collapse
-                    .panel-body
-                    | Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                    | sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-                    | minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-                    | commodo consequat.
-            |   
+        h4 Purchase a gift for one of your friends:
+        each events, email in friendEventItems
+            #accordion.panel-group
+                .panel.panel-default
+                    .panel-heading
+                        h4.panel-title
+                            a(data-toggle='collapse', data-parent='#accordion', href='#collapse'+friendHash[email].hash)
+                                b.giftBold#user #{friendHash[email].name}
+                                b  is wishing for:
+                    |     
+                    div(id='collapse'+friendHash[email].hash class='panel-collapse collapse')
+                        b Events:
+                        .panel-body
+                            each items, id in events   
+                                #accordion1.panel-group
+                                    .panel.panel-default
+                                        .panel-heading
+                                            h4.panel-title
+                                                a(data-toggle='collapse', data-parent='#accordion1', href='#collapse'+id+friendHash[email].hash)
+                                                    b #{eventHash[id]}
+                                        |     
+                                        div(id='collapse'+id+friendHash[email].hash class='panel-collapse collapse')
+                                            .panel-body
+                                                table.table
+                                                    thead
+                                                        tr
+                                                            th Item
+                                                            th Quantity Desired
+                                                            th Age Restriction
+                                                            th Quantity To Gift 
+                                                            
+                                                    tbody
+                                                        each item in items
+                                                            tr
+                                                                form(name='gift-item' method='POST' action="/gift")
+                                                                    td= item.name
+                                                                    td= item.quant
+                                                                    td= item.min_age
+                                                                    td
+                                                                        input(type='number' name='quantity' min='1' max=item.quant value='1' class='quantity')
+                                                                    td          
+                                                                        input(type='hidden' value=item.upc name='upc')  
+                                                                        input(type='hidden' value=email name='email')
+                                                                        input(type='hidden' value=id name='event_id')                   
+                                                                        button(type='submit' class='item-remove') Buy Gift
+                                     
+                            
