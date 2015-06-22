@@ -80,35 +80,49 @@ exports.wishlist = function(req, res) {
                 if(err) {
                     console.log(err);
                     req.flash("alert", ""+err);
-                    res.redirect("/");
-                }else {
-                    var error = null;
-                    var events = eventsData;
-                    console.log(events);
+                    eventsData = [];
+                }
+                var error = null;
+                var events = eventsData;
+                if(events == null) events = [];
+                console.log("iterating over events");
+
+                database.getUserGeneralItems(data.user.email, function(err, genItems) {
+                    if(err) {
+                        console.log(err);
+                        req.flash("alert", ""+err);
+                    }
+                    eventItems.general = genItems;
+                    if(events.length == 0) {
+                        console.log("no events");
+                        res.render('wishlist', {title: "Database Project", user:user, users:users, headerPhrase:phrase, alert:error, events:events, eventItems:eventItems, alert:req.flash("alert")});
+                        return;
+                    }
                     for(i=0; i<events.length; i++) {
-                        var event = events[i];
-                        var id = event.event_id;
-                        console.log(id);
-                        console.log("event "+i+" "+util.inspect(event, false, null));
-                        database.getEventItems(id, function(err, items) {
+                        database.getEventItems(events[i].event_id, function(err, items, id) {
+                            console.log(id);
                             if(err) {
+                                console.log(err);
                                 if(error) {
                                     error = error + "\n"+err;
                                 }else {
                                     error = ""+err;
                                 }
+                                eventItems[id] = [];
                             }else {
-                                console.log(items);
-                                console.log("events i: "+util.inspect(event, false, null));
+                                if(items == null) items = [];
+                                console.log("id "+id+" items: "+items);
                                 eventItems[id] = items;
-                                if(i == events.length) {
-                                    console.log("if statement end: "+util.inspect(eventItems, false, null));
-                                    res.render('wishlist', {title: "Database Project", user:user, users:users, headerPhrase:phrase, alert:error, events:events, eventItems:eventItems});
+                                if(id == events[events.length-1].event_id) {
+                                    console.log(util.inspect(events, false, null));
+                                    console.log(eventItems);
+                                    res.render('wishlist', {title: "Database Project", user:user, users:users, headerPhrase:phrase, alert:error, events:events, eventItems:eventItems, alert:req.flash("alert")});
                                 }
                             }                     
                         });
-                    }            
-                }
+                    }     
+                });
+                       
             });
             
             return;
@@ -120,7 +134,6 @@ exports.gift = function(req, res) {
     var user;
     var phrase;
     var users;
-    console.log("wishlist");
     getUserData(function(err, data) {
         if(err) {
             console.log(err);
@@ -131,13 +144,28 @@ exports.gift = function(req, res) {
             user = data.user.name;
             phrase = "Hello, "+user;
             users = data.users;
-            res.render('gift', {title: "Database Project", user:user, users:users, headerPhrase:phrase});
+            res.render('gift', {title: "Database Project", user:user, users:users, headerPhrase:phrase, alert:req.flash("alert")});
         }
     });
 }
 
 exports.settings = function(req, res) {
-    
+    var user;
+    var phrase;
+    var users;
+    getUserData(function(err, data) {
+        if(err) {
+            console.log(err);
+            res.redirect("/");
+            return;
+        }else{
+            user = data.user.name;
+            phrae = "Hello, "+user;
+            users = data.users;
+            res.render('settings', {title: "Database Project", user:user, users:users, headerPhrase:phrase, alert:req.flash("alert")});
+            return res;
+        }
+    });    
 }
 
 exports.newUser = function(req, res) {
@@ -226,7 +254,7 @@ exports.addItem = function(req, res) {
     var user;
     var phrase;
     var users;
-    console.log("wishlist");
+    var event_id = req.body.event_id;
     getUserData(function(err, data) {
         if(err) {
             console.log(err);
@@ -243,13 +271,128 @@ exports.addItem = function(req, res) {
                     req.flash("alert", ""+err);
                     res.redirect("/wishlist");
                 } else {
-                    res.render('additem', {title: "Database Project", user:user, users:users, headerPhrase:phrase, items:items});
+                    res.render('additem', {title: "Database Project", user:user, users:users, headerPhrase:phrase, items:items, event_id:event_id});
                     return;
                 }
             });           
         }
     });
 }
+
+exports.removeItem = function(req, res) {
+    var upc = req.body.upc;
+    database.removeItem(upc, function(err, data) {
+        if(err) {
+            req.flash("alert", ""+err);
+            res.redirect("/wishlist");
+        }else {
+            req.flash("alert", "Successfully Removed Item");
+            res.redirect("/wishlist");
+        }  
+    });
+}
+
+exports.newEvent = function(req, res) {
+    var e_name = req.body.e_name;
+    var start_date = req.body.from;
+    var end_date = req.body.to;
+    
+    database.newEvent(e_name, start_date, end_date, function(err, data) {
+        if(err) {
+            req.flash("alert", ""+err);
+            res.redirect("/wishlist");
+        }else {
+            req.flash("alert", "Successfully Added an event");
+            res.redirect("/wishlist");
+        }
+    });
+}
+
+exports.friends = function(req, res) {
+    var user;
+    var phrase;
+    var users;
+    getUserData(function(err, data) {
+        if(err) {
+            console.log(err);
+            res.redirect("/");
+            return;
+        }else{
+            user = data.user.name;
+            phrae = "Hello, "+user;
+            users = data.users;
+            database.getFriends(function(err, friends) {
+                if(err) {
+                    console.log(err);
+                    req.flash("alert", ""+err);
+                    res.redirect("/settings");
+                }else {
+                    console.log(friends);
+                    if(friends == null) friends = [];
+                    res.render('friends', {title: "Database Project", user:user, users:users, friends:friends, headerPhrase:phrase, alert:req.flash("alert")});
+                }
+            });
+        }
+    });
+}
+
+exports.addFriendIndex = function(req, res) {
+    var user;
+    var phrase;
+    var users;
+    getUserData(function(err, data) {
+        if(err) {
+            console.log(err);
+            res.redirect("/");
+            return;
+        }else{
+            user = data.user.name;
+            phrae = "Hello, "+user;
+            users = data.users;
+            database.getNonFriends(function(err, people) {
+                if(err) {
+                    console.log(err);
+                    req.flash("alert", ""+err);
+                    res.redirect("/friends");
+                }else {
+                    console.log(people);
+                    if(people == null) people = [];
+                    res.render('addfriend', {title: "Database Project", user:user, users:users, people:people, headerPhrase:phrase, alert:req.flash("alert")});
+                }
+            });
+        }
+    });
+}
+
+exports.addFriend = function(req, res) {
+    var wanter = req.body.email;
+    database.addFriend(wanter, function(err, data) {
+        if(err) {
+            console.log(err);
+            req.flash("alert", ""+err);
+            res.redirect("/friends");
+        }else {
+            req.flash("alert", "Successfully Added Friend");
+            res.redirect("/friends");
+        }
+    });
+    
+}
+
+exports.removeFriend = function(req, res) {
+    var wanter = req.body.email;
+    database.removeFriend(wanter, function(err, data) {
+        if(err) {
+            console.log(err);
+            req.flash("alert", ""+err);
+            res.redirect("/friends");
+        }else {
+            req.flash("alert", "Successfully Removed Friend");
+            res.redirect("/friends");
+        }
+    });
+}   
+
 
 exports.test = function(req, res) {
 	var data = database.getTestData();

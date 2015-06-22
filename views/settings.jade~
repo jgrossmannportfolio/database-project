@@ -3,6 +3,7 @@ extends layout
 block content
     #settings
         h4 Settings
+        br
         #links
             a(class='tab' href='#') Order History
             br
@@ -21,7 +22,7 @@ block content
                 a(class='tab2' href='#') Remove Shipping Address
             br
             br
-            a(class='tab' href='#') Friends
+            a(class='tab' href='/friends') Friends
                 br
                 a(class='tab2' href='#') Add Friend
                 br

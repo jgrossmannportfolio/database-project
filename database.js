@@ -30,6 +30,18 @@ function Want(email, upc, event_id, quant) {
     this.quant = quant;
 }
 
+function Event(email, e_name, date_start, date_end) {
+    this.email = email;
+    this.e_name = e_name;
+    this.date_start = date_start;
+    this.date_end = date_end;
+}
+
+function Friendship(wanter, gifter) {
+    this.wanter = wanter;
+    this.gifter = gifter;
+}
+
 
 var test_database = function(req) {
 	//db.connect();
@@ -60,13 +72,16 @@ exports.getTestData = getTestData;
 var getAllUsers = function(callback) {
     var users = null;
     console.log("database: getting users");
+    console.log("current user: "+currentUser);
     db.query('SELECT * from Person', function(err, rows, fields) {
-		if (!err) {
-            callback(null, rows);
+        console.log('query complete');
+		if (err) {
+            console.log('Error while performing Query.');
+            callback(err, null);
             return;
 		} else {
-			console.log('Error while performing Query.');
-            callback(err, null);
+            console.log("success");
+			callback(null, rows);
             return;
 		}
 	});
@@ -91,9 +106,7 @@ var setCurrentUser = function(req) {
         if(err) {
             console.log(err);
             return;
-        }
-    
-        if(data) {
+        }else{
             for(i=0; i<data.length; i++) {
                 if(newEmail === data[i].email) {
                     currentUser = data[i];
@@ -154,6 +167,7 @@ var removeUsers = function(data, callback) {
 exports.removeUsers = removeUsers;
 
 var getUserEvents = function(email, callback) {
+    console.log("getting user events");
     db.query('Select * FROM Event WHERE email = ?', email, function(err, rows) {
         if (err) {
             console.log('Error while performing Query.');
@@ -161,6 +175,7 @@ var getUserEvents = function(email, callback) {
             return;
             
 		} else {
+            console.log("events no error");
 			callback(null, rows);
             return;
 		}
@@ -172,11 +187,11 @@ var getEventItems = function(eventId, callback) {
     db.query('Select * FROM wants W, Item I WHERE W.upc = I.upc AND W.event_id = ?', eventId, function(err, rows) {
         if (err) {
             console.log('Error while performing Query.');
-            callback(err, null);
+            callback(err, null, null);
             return;
             
 		} else {
-			callback(null, rows);
+			callback(null, rows, eventId);
             return;
 		}
     });
@@ -202,16 +217,120 @@ var addItem = function(req) {
     var upc = req.data.upc;
     var quant = req.data.quant;
     var event_id = req.data.event_id;
-    db.query('INSERT INTO wants set ?', want, function(err, rows) {
-        if(err) {
-            console.log('Query Error');
-            req.io.emit('Added Item', {alert:""+err});
-        }else {
-            req.io.emit('Added Item', {});
-        }
-    });
+    console.log(want);
+    if(event_id == null) {
+        console.log("No event_id so this will go under general");
+    }
+    if(upc == null || quant == null || currentUser.email == null) {
+        req.io.emit('Added Item', {alert:"One or more of the required fields is null"});
+        return;
+    }else {
+        db.query('INSERT INTO wants set ?', want, function(err, rows) {
+            if(err) {
+                console.log('Query Error');
+                req.io.emit('Added Item', {alert:""+err});
+            }else {
+                req.io.emit('Added Item', {});
+            }
+        });
+    }
 }
 exports.addItem = addItem;
 
+var getUserGeneralItems = function(email, callback) {
+    db.query('SELECT * FROM Item I, wants W WHERE I.upc = W.upc AND W.event_id IS NULL AND W.email = ?', email, function(err, rows) {
+        if(err) {
+            console.log(err);
+            callback(err, null);
+        }else {
+            callback(null, rows);
+        }
+    });
+}
+exports.getUserGeneralItems = getUserGeneralItems;
 
+var removeItem = function(upc, callback) {
+    var email = currentUser.email;
+    db.query('DELETE FROM wants WHERE email = ? AND upc = ?', [email, upc], function(err, rows) {
+        if(err) {
+            console.log(err);
+            callback(err, null);
+        }else {
+            callback(null, rows);
+        }
+    });
+}
+exports.removeItem = removeItem;
+
+var newEvent = function(e_name, start_date, end_date, callback) {
+    var email = currentUser.email;
+    var event = new Event(email, e_name, start_date, end_date);
+    if(e_name == null || start_date == null || end_date == null || email == null) {
+        console.log("a value to new event is null");
+        callback("A value to new event is null");
+    }else {
+        db.query('INSERT INTO Event set ?', event, function(err, rows) {
+            if(err) {
+                console.log(err);
+                callback(err, null);
+            }else {
+                callback(null, rows);
+            }
+        });
+    }
+}
+exports.newEvent = newEvent;
+
+var getFriends = function(callback) {
+    var email = currentUser.email;
+    db.query('SELECT P.name, P.email FROM is_friend F, Person P WHERE F.wanter = P.email AND F.gifter = ?', email, function(err, rows) {
+        if(err) {
+            console.log(err);
+            callback(err, null);
+        }else {
+            callback(null, rows);
+        }
+    });
+}
+exports.getFriends = getFriends;
+
+var getNonFriends = function(callback) {
+    var email = currentUser.email;
+    db.query('SELECT P.name, P.email FROM Person P WHERE P.email NOT IN (SELECT P1.email FROM Person P1, is_friend F WHERE F.wanter = P1.email AND F.gifter = ?) AND P.email != ?', [email, email], function(err, rows) {
+        if(err) {
+            console.log(err);
+            callback(err, null);
+        }else {
+            callback(null, rows);
+        }
+    });
+}
+exports.getNonFriends = getNonFriends;
+
+var addFriend = function(wanter, callback) {
+    var gifter = currentUser.email;
+    var friendship = new Friendship(wanter, gifter);
+    db.query('INSERT INTO is_friend set ?', friendship, function(err, rows) {
+        if(err) {
+            console.log(err);
+            callback(err, null);
+        }else {
+            callback(null, rows);
+        }
+    });
+}
+exports.addFriend = addFriend;
+
+var removeFriend = function(wanter, callback) {
+    var gifter = currentUser.email;
+    db.query('DELETE FROM is_friend WHERE wanter = ? AND gifter = ?', [wanter, gifter], function(err, rows) {
+        if(err) {
+            console.log(err);
+            callback(err, null);
+        }else {
+            callback(null, rows);
+        }
+    });
+}
+exports.removeFriend = removeFriend;
 

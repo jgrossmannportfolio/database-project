@@ -120,3 +120,15 @@ float:right;
 float: right;
 }
 
+#newevent .input-group {
+display: inline-block;
+margin-left:2%
+}
+
+#newevent button {
+margin-left:2%
+}
+
+#newevent {
+margin-bottom: 5%
+}

@@ -48,9 +48,16 @@ app.get('/settings', views.settings);
 app.get('/new-user', views.newUser);
 app.get('/remove-user', views.removeUser);
 app.get('/additem', views.addItem);
+app.get('/friends', views.friends);
+app.get('/addfriend', views.addFriendIndex);
 
 app.post('/new-user', views.createNewUser);
 app.post('/remove-user', views.deleteUsers);
+app.post('/additem', views.addItem);
+app.post('/removeItem', views.removeItem);
+app.post('/new-event', views.newEvent);
+app.post('/addfriend', views.addFriend);
+app.post('/removefriend', views.removeFriend);
 
 
 app.listen(port);

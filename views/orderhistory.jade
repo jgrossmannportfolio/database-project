@@ -1,0 +1,18 @@
+extends layout
+
+block content
+
+    table.table.table-bordered
+        thead
+            tr
+                th Item
+                th Quantity
+                th Vendor
+                th Recipient
+        tbody
+            each buy in buys
+                tr
+                    td= buy.name
+                    td= buy.quant
+                    td= buy.vname
+                    td= buy.wanter

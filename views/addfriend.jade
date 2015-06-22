@@ -1,0 +1,20 @@
+extends layout
+
+block content
+    h3 Add a Friend
+    table.table
+        thead
+            tr
+                th Name
+                th Email
+                
+        tbody
+            each person in people
+                tr
+                    td= person.name
+                    td= person.email
+                    td
+                        form(name='addfriend' method='POST' action="/addfriend")
+                            input(type='hidden' value=person.email name='email')                                          
+                            button(type='submit' class='add-friend') Add Friend
+

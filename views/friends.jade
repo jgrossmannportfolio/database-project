@@ -1,0 +1,21 @@
+extends layout
+
+block content
+    h3 My Friends
+    table.table
+        thead
+            tr
+                th Name
+                th Email
+                
+        tbody
+            each friend in friends
+                tr
+                    td= friend.name
+                    td= friend.email
+                    td          
+                        form(name='removefriend' method='POST' action="/removefriend")
+                            input(type='hidden' value=friend.email name='email')                                          
+                            button(type='submit' class='friend-remove') Remove
+    form(name='addfriend' method='GET' action="/addFriend")
+        button(class='btn btn-default' type='submit') Add Friend 

@@ -10,6 +10,7 @@ block content
                 th Quantity
                 
         tbody
+            input(type='hidden' value=event_id class='hidden id')
             each item in items
                 tr
                     td= item.name

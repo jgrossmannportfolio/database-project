@@ -33,7 +33,7 @@ app.configure(function() {
 var database = require('./database.js');
 app.io.route('test_database', database.test_database);
 app.io.route('Change User', database.setCurrentUser);
-app.io.route('Add Item', database.
+app.io.route('Add Item', database.addItem);
 
 
 // set up "normal" http routes
@@ -48,9 +48,15 @@ app.get('/settings', views.settings);
 app.get('/new-user', views.newUser);
 app.get('/remove-user', views.removeUser);
 app.get('/additem', views.addItem);
+app.get('/friends', views.friends);
+app.get('/addfriend', views.addFriendIndex);
 
 app.post('/new-user', views.createNewUser);
 app.post('/remove-user', views.deleteUsers);
+app.post('/additem', views.addItem);
+app.post('/removeItem', views.removeItem);
+app.post('/new-event', views.newEvent);
+app.post('/addfriend', views.addFriend);
 
 
 app.listen(port);

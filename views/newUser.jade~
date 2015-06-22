@@ -5,7 +5,7 @@ block content
     form(id='newuser-form' action='/new-user' method='POST')
         label(for="email") Email
         .input-group
-            input(type='text' class='form-control error' placeholder='userxyz' aria-describedby='basic-addon2' name='email')
+            input(type='text' class='form-control error' placeholder='userxyz' aria-describedby='basic-addon2' name='email1')
             span(class='input-group-addon' id='basic-addon2') @
             input(type='text' class='form-control error' placeholder='example.com' aria-describedby='basic-addon2' name='email2')
         br

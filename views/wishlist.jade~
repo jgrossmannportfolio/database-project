@@ -2,7 +2,21 @@ extends layout
 
 block content
     div.navspacer
-    button(type='button' class='btn btn-default' id='new-event') Add Event To Wishlist
+   
+    form(id='newevent' action='/new-event' method='POST')       
+        .input-group
+            label(for='e_name') Event Name
+            input(type='text' class='form-control error' placeholder='Awesome Event' aria-describedby='basic-addon2' name='e_name')
+        .input-group
+            label(for='from') From
+            input(type='date' id='from' class='form-control error' placeholder='Start Date' name='from')
+        .input-group
+            label(for='to') To
+            input(type='text' class='form-control error' placeholder='End Date ' id='to' name='to')
+        br
+        br
+        button(type='' class='btn btn-default') Add Event To Wishlist
+
     div#wishlist
         b#user  I'm wishing for:
 
@@ -12,13 +26,15 @@ block content
                 .panel.panel-default
                     .panel-heading
                         h4.panel-title
-                            a(data-toggle='collapse', data-parent='#accordion', href='#collapse1')
+                            a(data-toggle='collapse', data-parent='#accordion', href='#collapse'+id)
                                 | #{event.e_name} 
                             .date-range #{event.date_start} to #{event.date_end}
                     |    
-                    #collapse1.panel-collapse.collapse
+                    div(id='collapse'+id class='panel-collapse collapse')
                         .panel-body
                             - var items = eventItems[id]
+                                if items == null
+                                    items = []
                                 table.table
                                     thead
                                         tr
@@ -32,8 +48,41 @@ block content
                                                 td= item.name
                                                 td= item.quant
                                                 td= item.min_age
-                                                td 
-                                                    button(type='button' class='item-remove') Remove
-                                 button(type='button' class='add-item') Add Item To List   
-                                       
-    
+                                                td          
+                                                    form(name='removeitem' method='POST' action="/removeItem")
+                                                        input(type='hidden' value=item.upc name='upc')                                          
+                                                        button(type='submit' class='item-remove') Remove
+                                form(name='eventadditem' method='POST' action="/additem")
+                                    input(type='hidden' value=id name='event_id')
+                                    button(class='btn btn-default' type='submit') Add Item To List   
+            .panel.panel-default
+                .panel-heading
+                    h4.panel-title
+                        a(data-toggle='collapse', data-parent='#accordion', href='#collapseGeneral')
+                            | General 
+                |    
+                #collapseGeneral.panel-collapse.collapse
+                    .panel-body
+                        - var items = eventItems.general
+                            if items == null
+                                items = []
+                            table.table
+                                thead
+                                    tr
+                                        th Item
+                                        th Quantity
+                                        th Age Restriction
+                                        
+                                tbody
+                                    each item in items
+                                        tr
+                                            td= item.name
+                                            td= item.quant
+                                            td= item.min_age
+                                            td                                                    
+                                                form(name='removeitem' method='POST' action="/removeItem")
+                                                    input(type='hidden' value=item.upc name='upc')                                          
+                                                    button(type='submit' class='item-remove') Remove
+                            form(name='eventadditem' method='POST' action="/additem")
+                                button(class='btn btn-default' type='submit') Add Item To List  
+

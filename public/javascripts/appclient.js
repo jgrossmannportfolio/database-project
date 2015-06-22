@@ -48,11 +48,11 @@ var myapp = (function(){
 
     var addItem = function() {
         console.log("add item");
-        //var parent = $(this).parent().parent();
         var parent = $(this).parent().parent().find("td.item");
         var upc = $(parent).find(".hidden").attr("value");
         var quant = $(parent).find(".quantity").prop("value");
-        socket.emit("Add Item", {upc:upc, quant:quant});
+        var event_id = $("#additem .hidden.id").attr("value");
+        socket.emit("Add Item", {upc:upc, quant:quant, event_id:event_id});
     }
 
     socket.on('Added Item', function(req) {
@@ -74,6 +74,59 @@ var myapp = (function(){
             jQuery("#remove-table tr").click(selectRemoveUser);
             jQuery("button#remove-user").click(removeUsers);
             jQuery("#additem button").click(addItem);
+            jQuery('#datepicker').datepicker();
+            $(function() {
+                $( "#from" ).datepicker({
+                  defaultDate: "+1w",
+                  minDate: "0",
+                  dateFormat: "yy-mm-dd",
+                  changeMonth: true,
+                  numberOfMonths: 3,
+                  onClose: function( selectedDate ) {
+                    $( "#to" ).datepicker( "option", "minDate", selectedDate );
+                  }
+                });
+                $( "#to" ).datepicker({
+                  defaultDate: "+1w",
+                  dateFormat: "yy-mm-dd",
+                  changeMonth: true,
+                  numberOfMonths: 3,
+                  onClose: function( selectedDate ) {
+                    $( "#from" ).datepicker( "option", "maxDate", selectedDate );
+                  }
+                });
+              });
+
+            jQuery("#newevent").validate({
+                rules: {
+                    e_name: {
+                        minlength: 1,
+                        required: true
+                    },
+                    from: {
+                        required: true,
+                        date: true
+                    },
+                    to: {
+                        required: true,
+                        date: true
+                    }
+                },
+                errorPlacement: function(error, element) {
+                    element.parent().after(error);
+                }, 
+                highlight: function(element) {
+                    $("#newevent button").attr("type", "");
+                    $(element).removeClass('success').addClass('error');
+                },
+                success: function(label) {
+                    $(label).remove();
+                    if($("#newevent input").hasClass("error") == false) {
+                        $("#newevent button").attr("type", "submit");
+                    }
+                }
+            });
+
             jQuery("#newuser-form").validate({
                 rules: {
                     email1: {
