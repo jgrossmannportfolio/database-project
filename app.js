@@ -50,6 +50,9 @@ app.get('/remove-user', views.removeUser);
 app.get('/additem', views.addItem);
 app.get('/friends', views.friends);
 app.get('/addfriend', views.addFriendIndex);
+app.get('/orderhistory', views.getOrderHistory);
+app.get('/shippingAddresses', views.getShippingAddresses);
+app.get('/paymentmethods', views.getPaymentMethods);
 
 app.post('/new-user', views.createNewUser);
 app.post('/remove-user', views.deleteUsers);
@@ -60,6 +63,8 @@ app.post('/addfriend', views.addFriend);
 app.post('/removefriend', views.removeFriend);
 app.post('/gift', views.giftItem);
 app.post('/vendorList', views.getVendorList);
+app.post('/removeAddress', views.removeAddress);
+app.post("/newAddress", views.addAddress);
 
 
 app.listen(port);

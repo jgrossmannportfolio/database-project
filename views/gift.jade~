@@ -27,6 +27,7 @@ block content
                                         |     
                                         div(id='collapse'+id+friendHash[email].hash class='panel-collapse collapse event-list '+id)
                                             input(type='hidden' name='id'+id value=id class='event-list' id=id)
+                                            input(type='hidden' name='email' value=email id='wanteremail')
                                             .panel-body
                                                 table.table
                                                     thead

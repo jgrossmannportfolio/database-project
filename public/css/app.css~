@@ -91,7 +91,7 @@ margin-left: 15px;
 }
 
 .navspacer {
-height: 4%;
+
 }
 
 #new-event {
@@ -133,3 +133,15 @@ margin-left:2%
 margin-bottom: 4%
 }
 
+#saletext {
+color: red
+}
+
+#newAddress.input-group {
+display:inline-block;
+margin-left: 3%;
+}
+
+button#newAddress {
+margin-left: 3%
+}

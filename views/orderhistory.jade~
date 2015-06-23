@@ -10,9 +10,9 @@ block content
                 th Vendor
                 th Recipient
         tbody
-            each buy in buys
+            each order in orders
                 tr
-                    td= buy.name
-                    td= buy.quant
-                    td= buy.vname
-                    td= buy.wanter
+                    td= order.iname
+                    td= order.quant
+                    td= order.vname
+                    td= order.name

@@ -1,0 +1,54 @@
+extends layout
+
+block content
+    div.navspacer
+   
+    form(id='newaddress' action='/newAddress' method='POST')       
+        #newAddress.input-group
+            label(for='a1') Address 1
+            input(type='text' class='form-control error' placeholder='123 Main Street' aria-describedby='basic-addon2' name='a1')
+        #newAddress.input-group
+            label(for='a2') Address 2
+            input(type='text' class='form-control error' placeholder='Box 1234' aria-describedby='basic-addon2' name='a2')
+        #newAddress.input-group
+            label(for='city') City
+            input(type='text' class='form-control error' placeholder='Chicago' aria-describedby='basic-addon2' name='city')
+        #newAddress.input-group
+            label(for='state') State
+            select(name='state' form='newaddress' class='form-control')
+                each state in states
+                    option(value=state) #{state}
+        #newAddress.input-group
+            label(for='zip') Zip
+            input(type='text' class='form-control error' placeholder='11345' aria-describedby='basic-addon2' name='zip')
+        br
+        br
+        button(type='' class='btn btn-default' id='newAddress') Add Address
+        br
+        br
+    h3 Shipping Addresses
+    table.table
+        thead
+            tr
+                th Address 1
+                th Address 2
+                th City
+                th State
+                th Zip
+                
+        tbody
+            each address in addresses
+                tr
+                    td= address.a1
+                    td= address.a2
+                    td= address.city
+                    td= address.state
+                    td= address.zip
+                    td          
+                        form(name='removeAddress' method='POST' action="/removeAddress")
+                            input(type='hidden' value=address.a1 name='a1')      
+                            input(type='hidden' value=address.a2 name='a2')
+                            input(type='hidden' value=address.city name='city')
+                            input(type='hidden' value=address.state name='state')
+                            input(type='hidden' value=address.zip name = 'zip')                                    
+                            button(type='submit' class='address-remove') Remove

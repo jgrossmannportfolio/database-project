@@ -87,7 +87,6 @@ var myapp = (function(){
             for(var upc in itemVendors) {
                 setVendorsLoop(itemVendors[upc], event_id, function() {});
             }
-            $("div."+event_id+" td#price.9").text("100.00");
         }
     });
 
@@ -137,6 +136,7 @@ var myapp = (function(){
     return {
         init: function() {
             //console.log("Client-side app starting up")
+            
 			jQuery("#testbutton").click(test);
             jQuery("#Select-User a").click(changeUser);
             jQuery("#remove-table tr").click(selectRemoveUser);
@@ -170,6 +170,36 @@ var myapp = (function(){
                   }
                 });
               });
+            jQuery("form#newaddress").validate({
+                rules: {
+                    a1: {
+                        required: true,
+                        minlength: 1
+                    },
+                    city: {
+                        required: true,
+                        minlength: 1
+                    },
+                    zip: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 5,
+                    }
+                },
+                errorPlacement: function(error, element) {
+                    element.parent().after(error);
+                }, 
+                highlight: function(element) {
+                    $("button#newAddress").attr("type", "");
+                    $(element).removeClass('success').addClass('error');
+                },
+                success: function(label) {
+                    $(label).remove();
+                    if($("#newAddress input").hasClass("error") == false) {
+                        $("button#newAddress").attr("type", "submit");
+                    }
+                }
+            });
 
             jQuery("#newevent").validate({
                 rules: {

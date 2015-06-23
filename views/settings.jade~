@@ -5,7 +5,7 @@ block content
         h4 Settings
         br
         #links
-            a(class='tab' href='#') Order History
+            a(class='tab' href='/orderhistory') Order History
             br
             br
             a(class='tab' href='#') Payment Information
@@ -15,16 +15,16 @@ block content
                 a(class='tab2' href='#') Remove Payment Information
             br
             br
-            a(class='tab' href='#') Shipping Addresses
+            a(class='tab' href='/shippingAddresses') Shipping Addresses
                 br
-                a(class='tab2' href='#') Add Shipping Address
+                a(class='tab2' href='/shippingAddresses') Add Shipping Address
                 br
-                a(class='tab2' href='#') Remove Shipping Address
+                a(class='tab2' href='/shippingAddresses') Remove Shipping Address
             br
             br
             a(class='tab' href='/friends') Friends
                 br
-                a(class='tab2' href='#') Add Friend
+                a(class='tab2' href='/addfriend') Add Friend
                 br
-                a(class='tab2' href='#') Remove Friend
+                a(class='tab2' href='/friends') Remove Friend
 

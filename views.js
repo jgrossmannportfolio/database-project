@@ -86,7 +86,6 @@ exports.wishlist = function(req, res) {
                 var error = null;
                 var events = eventsData;
                 if(events == null) events = [];
-                console.log("iterating over events");
 
                 database.getUserGeneralItems(data.user.email, function(err, genItems) {
                     if(err) {
@@ -101,7 +100,6 @@ exports.wishlist = function(req, res) {
                     }
                     for(i=0; i<events.length; i++) {
                         database.getEventItems(events[i].event_id, function(err, items, id) {
-                            console.log(id);
                             if(err) {
                                 console.log(err);
                                 if(error) {
@@ -115,8 +113,6 @@ exports.wishlist = function(req, res) {
                                 console.log("id "+id+" items: "+items);
                                 eventItems[id] = items;
                                 if(id == events[events.length-1].event_id) {
-                                    console.log(util.inspect(events, false, null));
-                                    console.log(eventItems);
                                     res.render('wishlist', {title: "Database Project", user:user, users:users, headerPhrase:phrase, alert:error, events:events, eventItems:eventItems, alert:req.flash("alert")});
                                 }
                             }                     
@@ -171,7 +167,7 @@ exports.settings = function(req, res) {
             return;
         }else{
             user = data.user.name;
-            phrae = "Hello, "+user;
+            phrase = "Hello, "+user;
             users = data.users;
             res.render('settings', {title: "Database Project", user:user, users:users, headerPhrase:phrase, alert:req.flash("alert")});
             return res;
@@ -292,7 +288,7 @@ exports.addItem = function(req, res) {
 
 exports.removeItem = function(req, res) {
     var upc = req.body.upc;
-    database.removeItem(upc, function(err, data) {
+    database.removeItem(null, upc, function(err, data) {
         if(err) {
             req.flash("alert", ""+err);
             res.redirect("/wishlist");
@@ -330,7 +326,7 @@ exports.friends = function(req, res) {
             return;
         }else{
             user = data.user.name;
-            phrae = "Hello, "+user;
+            phrase = "Hello, "+user;
             users = data.users;
             database.getFriends(function(err, friends) {
                 if(err) {
@@ -358,7 +354,7 @@ exports.addFriendIndex = function(req, res) {
             return;
         }else{
             user = data.user.name;
-            phrae = "Hello, "+user;
+            phrase = "Hello, "+user;
             users = data.users;
             database.getNonFriends(function(err, people) {
                 if(err) {
@@ -411,16 +407,108 @@ exports.giftItem = function(req, res) {
     var event_id = req.body.event_id;
     var quantity = req.body.quantity;
     var wantQuantity = req.body.wantQuantity;
+    var min_age = req.body.min_age;
     if(event_id == "General") {
         event_id = null;
     }
-    res.redirect("/gift");
+    database.updateWant(wanter, upc, event_id, quantity, wantQuantity, min_age, function(err) {
+        if(err) {
+            console.log(err);
+            req.flash("alert", ""+err);
+            res.redirect("/gift");
+        }else {
+            req.flash("alert", "Successfully purchased gift");
+            res.redirect("/gift");
+        }
+    });
 };
 
 exports.getVendorList = function(req, res) {
-    console.log(req.body);
     var itemVends = req.body.itemVends;
     var event_id = req.body.event_id;
     res.render("vendorlist", {vendors:itemVends, event_id:event_id});
 };
+
+exports.getOrderHistory = function(req, res) {
+    var user;
+    var phrase;
+    var users;
+    getUserData(function(err, data) {
+        if(err) {
+            console.log(err);
+            res.redirect("/");
+            return;
+        }else{
+            user = data.user.name;
+            phrase = "Hello, "+user;
+            users = data.users;
+            database.getOrderHistory(function(err, orders) {
+                if(err) {
+                    console.log(err);
+                    req.flash("alert", ""+err);
+                    res.redirect("/settings");
+                }else {
+                    res.render('orderhistory', {title: "Database Project", user:user, users:users, orders:orders, headerPhrase:phrase, alert:req.flash("alert")});
+                }
+            });
+        }
+    });      
+}
+
+exports.getShippingAddresses = function(req, res) {
+    var user;
+    var phrase;
+    var users;
+    var states = new Array("AK","AL","AR","AZ","CA","CO","CT","DC","DE","FL","GA","GU","HI","IA","ID", "IL","IN","KS","KY","LA","MA","MD","ME","MH","MI","MN","MO","MS","MT","NC","ND","NE","NH","NJ","NM","NV","NY", "OH","OK","OR","PA","PR","PW","RI","SC","SD","TN","TX","UT","VA","VI","VT","WA","WI","WV","WY");
+    getUserData(function(err, data) {
+        if(err) {
+            console.log(err);
+            res.redirect("/");
+            return;
+        }else{
+            user = data.user.name;
+            phrase = "Hello, "+user;
+            users = data.users;
+            database.getShippingAddresses(function(err, addresses) {
+                if(err) {
+                    console.log(err);
+                    res.redirect("/settings");
+                }else {
+                    console.log(addresses);
+                    res.render('shipping-addresses', {title: "Database Project", user:user, users:users, addresses:addresses, states:states, headerPhrase:phrase, alert:req.flash("alert")});
+                }
+            });
+        }
+    });      
+}
+
+exports.removeAddress = function(req, res) {
+    database.removeAddress(req.body.a1, req.body.a2, req.body.city, req.body.state, req.body.zip, function(err) {
+        if(err) {
+            console.log(err);
+            req.flash("alert", ""+err);
+            res.redirect("/shippingAddresses");
+        }else {
+            req.flash("alert", "Successfully removed Address");
+            res.redirect("/shippingAddresses");
+        }
+    });
+}
+
+exports.addAddress = function(req, res) {
+    database.addAddress(req.body.a1, req.body.a2, req.body.city, req.body.state, req.body.zip, function(err) {
+        if(err) {
+            console.log(err);
+            req.flash("alert", ""+err);
+            res.redirect("/shippingAddresses");
+        }else {
+            req.flash("alert", "Successfully Added Address");
+            res.redirect("/shippingAddresses");
+        }
+    }); 
+}
+
+exports.getPaymentMethods = function(req, res) {
+    res.redirect("/settings");
+}
 

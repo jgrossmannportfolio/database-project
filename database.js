@@ -44,6 +44,15 @@ function Friendship(wanter, gifter) {
     this.gifter = gifter;
 }
 
+function Address(email, a1, a2, city, state, zip) {
+    this.email = email;
+    this.a1 = a1;
+    this.a2 = a2;
+    this.city = city;
+    this.state = state;
+    this.zip = zip;
+}
+
 
 var test_database = function(req) {
 	//db.connect();
@@ -251,13 +260,17 @@ var getUserGeneralItems = function(email, callback) {
 }
 exports.getUserGeneralItems = getUserGeneralItems;
 
-var removeItem = function(upc, callback) {
-    var email = currentUser.email;
+var removeItem = function(email, upc, callback) {
+    if(email == null) {
+        email = currentUser.email;
+    }
+    console.log(email, " "+upc);
     db.query('DELETE FROM wants WHERE email = ? AND upc = ?', [email, upc], function(err, rows) {
         if(err) {
             console.log(err);
             callback(err, null);
         }else {
+            console.log("deleted?");
             callback(null, rows);
         }
     });
@@ -344,14 +357,12 @@ var getFriendData = function(otherCallBack) {
                 if(err) {
                     callback(err, null);
                 }else {
-                    console.log(friends);
                     callback(null, friends);
                 }
             });
         },
     
         function(friends, callback) {
-            console.log("friends in 2: "+friends);
             var friendEventItems= {};
             var friendHash = {};
             var eventHash = {};
@@ -365,7 +376,7 @@ var getFriendData = function(otherCallBack) {
                     }else {
                         friendEventItems[friend.email].General = items;
                         eventHash.General = 'General';
-                        console.log("Got general items: "+items);
+                        //console.log("Got general items: "+items);
                         getUserEvents(friend.email, function(err, events) {
                             if(err) {
                                 callback(err);
@@ -375,7 +386,7 @@ var getFriendData = function(otherCallBack) {
                                         if(err) {
                                             callback(err);
                                         }else {
-                                            console.log("got event items: "+items);
+                                            //console.log("got event items: "+items);
                                             eventHash[event.event_id] = event.e_name;
                                             friendEventItems[friend.email][event.event_id] = items;
                                             callback();
@@ -401,7 +412,7 @@ var getFriendData = function(otherCallBack) {
             });
         }
     ], function(err, friendEventItems, friendHash, eventHash) {
-            console.log(util.inspect(friendEventItems, false, null));
+            //console.log(util.inspect(friendEventItems, false, null));
             if(err) {
                 console.log(err);
             }
@@ -421,7 +432,7 @@ var getFriendEmailHash = function(callback) {
                 
                 callback();
             }, function(err) {
-                console.log(util.inspect(friendHash, false, null));
+                //console.log(util.inspect(friendHash, false, null));
                 callback(null, friendHash);
             });
         }
@@ -460,21 +471,21 @@ var getItemVendForEvent = function(req) {
 	                "ON IV.upc = S.upc And IV.vid = S.vid) T2 "+
                     "Where T1.upc = T2.upc AND T1.event_id = ?";
     }
-    console.log(param);
+    //console.log(param);
     db.query(query, param, function(err, rows) {
         if(err) {
             console.log("error database query");
             console.log(err);
             req.io.emit("Vendors Finished", {itemVendors:itemVendors, event_id:event_id, err:err});
         }else {
-            console.log("query results: "+util.inspect(rows, false, null));
+            //console.log("query results: "+util.inspect(rows, false, null));
             async.forEach(rows, function(row, callback) {
                 console.log("row: "+row.upc);
                 if(itemVendors[row.upc] == null) {
                     itemVendors[row.upc] = [row];
                     callback();
                 }else {
-                    console.log(row.upc);
+                    //console.log(row.upc);
                     itemVendors[row.upc].push(row);
                     callback();
                 }
@@ -505,13 +516,118 @@ var getItemVend = function(req) {
             console.log(err);
             req.io.emit("Got ItemVend", {data:rows, vid:vid, upc:upc, event_id:event_id, err:err});
         }else {
-            console.log(rows);
+            //console.log(rows);
             req.io.emit("Got ItemVend", {data:rows, vid:vid, upc:upc, event_id:event_id, err:err});
         }
     });
 };
 exports.getItemVend = getItemVend;
 
-                    
+var getOrderHistory = function(callback) {
+    var email = currentUser.email;
+    var query = "SELECT V.iname, B.quant, V.vname, B.name "+
+                "FROM (SELECT * "+
+                        "FROM buys B, Person P "+
+                        "WHERE B.wanter = P.email "+
+                        "AND B.gifter = ?) B, "+
+                     "(SELECT IV.vid, IV.upc, V.name as vname, IV.iname "+
+                                "FROM (SELECT IV.upc, IV.vid, I.name as iname "+
+                                        "FROM Item I, Item_vend IV "+
+                                        "WHERE I.upc = IV.upc) IV, Vendor V "+
+                                "WHERE IV.vid = V.vid) V "+
+                "WHERE B.upc = V.upc "+
+                "AND B.vid = V.vid";
+    db.query(query, email, function(err, rows) {
+        if(err) {
+            console.log(err);
+            callback(err, null);
+        }else {
+            console.log(rows);
+            callback(null, rows);
+        }
+    });
+}
+exports.getOrderHistory = getOrderHistory;
+
+var getShippingAddresses = function(callback) {
+    var email = currentUser.email;
+    var query = "SELECT * "+
+                "FROM Address A "+
+                "WHERE A.email = ?";
+    db.query(query, email, function(err, rows) {
+        if(err) {
+            console.log(err);
+            callback(err, null);
+        }else {
+            callback(null, rows);
+        }
+    });
+}
+exports.getShippingAddresses = getShippingAddresses;
+
+var removeAddress = function(a1, a2, city, state, zip, callback) {
+    var email = currentUser.email;
+    var address = [email, a1, a2, city, state, zip];
+    var query = "DELETE FROM Address WHERE email = ? AND a1 = ? AND a2 = ? AND city = ? AND state = ? AND zip = ?";
+    db.query(query, address, function(err, rows) {
+        if(err) {
+            console.log(err);
+            callback(err);
+        }else {
+            callback();
+        }
+    });
+}
+exports.removeAddress = removeAddress;
+    
+var addAddress = function(a1, a2, city, state, zip, callback) {
+    var email = currentUser.email;
+    var address = new Address(email, a1, a2, city, state, zip);
+    var query = "INSERT INTO Address set ?";
+    console.log(address);
+    db.query(query, address, function(err, rows) {
+        if(err) {
+            console.log(err);
+            callback(err);
+        }else {
+            callback();
+        }
+    });
+}
+exports.addAddress = addAddress;         
+
+var updateWant = function(wanter, upc, event_id, quantity, wantQuantity, min_age, callback) {
+    var age = currentUser.age;
+    if(age < min_age) {
+        console.log("Too young to purchase");
+        callback("You must be at least: "+min_age+" to purchase this item");
+    }else {
+        var quant = wantQuantity - quantity;
+        if(quant == 0) {
+            console.log("removing item");
+            removeItem(wanter, upc, function(err, data) {
+                if(err) {
+                    console.log(err);
+                    callback(err);
+                }else {
+                    console.log("removed");
+                    console.log(data);
+                    callback(null);
+                }
+            });
+        }else {
+            var query = 'UPDATE wants set ? WHERE upc = ? AND email = ?';
+            db.query(query, [{quant:quant}, upc, wanter], function(err, rows) {
+                if(err) {
+                    console.log(err);
+                    callback(err);
+                }else {
+                    callback(null);
+                }
+            });
+        }
+    }
+}
+exports.updateWant = updateWant;      
                         
 
