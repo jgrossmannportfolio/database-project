@@ -364,6 +364,7 @@ var getFriendData = function(otherCallBack) {
                         callback(err);
                     }else {
                         friendEventItems[friend.email].General = items;
+                        eventHash.General = 'General';
                         console.log("Got general items: "+items);
                         getUserEvents(friend.email, function(err, events) {
                             if(err) {
@@ -428,6 +429,89 @@ var getFriendEmailHash = function(callback) {
 }
 exports.getFriendEmailHash = getFriendEmailHash;
 
+var getItemVendForEvent = function(req) {
+    var event_id = req.data.event_id;
+    var itemVendors = {};
+    var email = req.data.email;
+    var query;
+    var param;
+    //itemVendors[items.upc] = {}
+    if(event_id == "General") {
+        param = email;
+        console.log("General query id "+email);
+        query = "SELECT T2.upc, T2.vid, T2.name, T2.quat, T2.price, T2.discount, T1.email "+
+                "FROM (SELECT W.upc, W.email "+
+		            "FROM wants W "+
+		            "WHERE W.event_id IS NULL AND W.email = ?) T1, "+
+	                "(SELECT IV.upc, IV.vid, IV.quat, IV.price, IV.name, S.discount "+
+	                "FROM (select V.name, IV.upc, IV.vid, IV.quat, IV.price from Vendor V, Item_vend IV where IV.vid = V.vid) IV "+
+	                "Left Join Sale S "+
+	                "ON IV.upc = S.upc And IV.vid = S.vid) T2 "+
+                    "Where T1.upc = T2.upc";
+    }else {
+        param = event_id;
+        query = "SELECT T2.upc, T2.vid, T2.name, T2.quat, T2.price, T2.discount, T1.email "+
+                "FROM (SELECT E.event_id, W.upc, E.email "+
+		            "FROM Event E, wants W "+
+		            "WHERE W.event_id = E.event_id) T1, "+
+	                "(SELECT IV.upc, IV.vid, IV.quat, IV.price, IV.name, S.discount "+
+	                "FROM (select V.name, IV.upc, IV.vid, IV.quat, IV.price from Vendor V, Item_vend IV where IV.vid = V.vid) IV "+
+	                "Left Join Sale S "+
+	                "ON IV.upc = S.upc And IV.vid = S.vid) T2 "+
+                    "Where T1.upc = T2.upc AND T1.event_id = ?";
+    }
+    console.log(param);
+    db.query(query, param, function(err, rows) {
+        if(err) {
+            console.log("error database query");
+            console.log(err);
+            req.io.emit("Vendors Finished", {itemVendors:itemVendors, event_id:event_id, err:err});
+        }else {
+            console.log("query results: "+util.inspect(rows, false, null));
+            async.forEach(rows, function(row, callback) {
+                console.log("row: "+row.upc);
+                if(itemVendors[row.upc] == null) {
+                    itemVendors[row.upc] = [row];
+                    callback();
+                }else {
+                    console.log(row.upc);
+                    itemVendors[row.upc].push(row);
+                    callback();
+                }
+            }, function(err) {
+                if(err) {
+                    console.log(err);
+                    req.io.emit("Vendors Finished", {itemVendors:itemVendors, event_id:event_id, err:err});
+                }else {
+                    req.io.emit("Vendors Finished", {itemVendors:itemVendors, event_id:event_id, err:err});
+                }
+            });
+        }
+    });
+}
+exports.getItemVendForEvent = getItemVendForEvent;
+
+var getItemVend = function(req) {
+    console.log("getting item vend");
+    var vid = req.data.vid;
+    var upc = req.data.upc;
+    var event_id = req.data.event_id;
+    console.log(vid + " "+upc);
+    var query = "SELECT S.discount, IV.price, S.vid, IV.upc "+
+                "FROM (SELECT iv.price, iv.vid, iv.upc FROM Item_vend iv WHERE iv.vid = ? AND iv.upc = ?) IV "+
+                "LEFT JOIN (SELECT s.discount, s.vid FROM Sale s WHERE s.vid = ? AND s.upc = ?) S "+
+                "ON S.vid = IV.vid";
+    db.query(query, [vid, upc, vid, upc], function(err, rows) {
+        if(err) {
+            console.log(err);
+            req.io.emit("Got ItemVend", {data:rows, vid:vid, upc:upc, event_id:event_id, err:err});
+        }else {
+            console.log(rows);
+            req.io.emit("Got ItemVend", {data:rows, vid:vid, upc:upc, event_id:event_id, err:err});
+        }
+    });
+};
+exports.getItemVend = getItemVend;
 
                     
                         

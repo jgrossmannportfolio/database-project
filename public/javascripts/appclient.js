@@ -69,6 +69,70 @@ var myapp = (function(){
         $(this).parent().addClass('active');
     };
 
+    var addVendors = function() {
+        var event_id = $(this).parent().parent().parent().find("input.event-list").attr("value");
+        var email = $(this).parent().parent().parent().find("input#wanteremail").attr("value");
+        console.log(event_id + " "+email);
+        socket.emit("Get Vendors", {event_id:event_id, email:email});
+    }
+
+    socket.on("Vendors Finished", function(req) {
+        var err = req.err;
+        if(err) {
+            alert(""+err);
+            return;
+        }else {
+            var itemVendors = req.itemVendors;
+            var event_id = req.event_id;
+            for(var upc in itemVendors) {
+                setVendorsLoop(itemVendors[upc], event_id, function() {});
+            }
+            $("div."+event_id+" td#price.9").text("100.00");
+        }
+    });
+
+    var setPrice = function(event_id, itemVend, callback) {
+        if(itemVend.discount) {
+            console.log("price: "+itemVend.price);
+            itemVend.price = (itemVend.price - (itemVend.price * 0.01 * itemVend.discount)).toFixed(2);
+            $("div."+event_id+" td#price."+itemVend.upc).text(itemVend.price).css("color", "red");
+        } else {
+            $("div."+event_id+" td#price."+itemVend.upc).text(itemVend.price);
+        }
+        callback(); 
+    };
+
+    var setVendorsLoop = function(itemVends, event_id, callback) {
+        for(i=0; i<itemVends.length; i++) {
+            $("div."+event_id+" td#vendorlist."+itemVends[i].upc).load("/vendorList", {itemVends:itemVends, event_id:event_id});
+            setPrice(event_id, itemVends[i], function() {});
+            if(i==itemVends.length) callback();
+        }   
+    };
+
+    var updatePrice = function() {
+        console.log("updating price");
+        var vid = $(this).find(":selected").attr("id");
+        var upc = $(this).find(":selected").attr("class")
+        var event_id = $(this).parent().parent().parent().attr("id");
+        socket.emit("Get ItemVend", {vid:vid, upc:upc, event_id:event_id});
+    };
+
+    socket.on("Got ItemVend", function(req) {
+        var data = req.data[0];
+        var event_id = req.event_id;
+        var upc = req.upc;
+        var vid = req.vid;
+        if(data.discount) {
+            data.price = data.price - (data.price * data.discount);
+            console.log("new discount: "+data.price);
+            $("div."+event_id+" td#price."+upc).text(data.price).css("color", "red");
+        } else {
+            console.log("price: "+data.price);
+            $("div."+event_id+" td#price."+upc).text(data.price).css("color", "black");
+        }
+    });
+
     
     return {
         init: function() {
@@ -79,6 +143,8 @@ var myapp = (function(){
             jQuery("button#remove-user").click(removeUsers);
             jQuery("#additem button").click(addItem);
             jQuery('#datepicker').datepicker();
+            jQuery('a.event-link').click(addVendors);
+            jQuery('.table').on('change', '#vendor-list', updatePrice);
             jQuery('#navbar a').filter(function() {
                 return this.href == window.location;
             }).parent().addClass('active');

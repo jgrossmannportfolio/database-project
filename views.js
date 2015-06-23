@@ -417,3 +417,10 @@ exports.giftItem = function(req, res) {
     res.redirect("/gift");
 };
 
+exports.getVendorList = function(req, res) {
+    console.log(req.body);
+    var itemVends = req.body.itemVends;
+    var event_id = req.body.event_id;
+    res.render("vendorlist", {vendors:itemVends, event_id:event_id});
+};
+

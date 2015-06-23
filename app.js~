@@ -34,13 +34,13 @@ var database = require('./database.js');
 app.io.route('test_database', database.test_database);
 app.io.route('Change User', database.setCurrentUser);
 app.io.route('Add Item', database.addItem);
+app.io.route('Get Vendors', database.getItemVendForEvent);
 
 
 // set up "normal" http routes
 var views = require('./views.js');
 app.get('/', views.index);
 app.get('/#', views.index);
-app.get('/test', views.test);
 app.get('/home', views.index);
 app.get('/wishlist', views.wishlist);
 app.get('/gift', views.gift);
@@ -59,6 +59,7 @@ app.post('/new-event', views.newEvent);
 app.post('/addfriend', views.addFriend);
 app.post('/removefriend', views.removeFriend);
 app.post('/gift', views.giftItem);
+app.post('/vendorList', views.getVendorList);
 
 
 app.listen(port);

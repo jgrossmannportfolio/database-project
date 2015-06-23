@@ -34,7 +34,8 @@ var database = require('./database.js');
 app.io.route('test_database', database.test_database);
 app.io.route('Change User', database.setCurrentUser);
 app.io.route('Add Item', database.addItem);
-
+app.io.route('Get Vendors', database.getItemVendForEvent);
+app.io.route('Get ItemVend', database.getItemVend);
 
 // set up "normal" http routes
 var views = require('./views.js');
@@ -58,6 +59,7 @@ app.post('/new-event', views.newEvent);
 app.post('/addfriend', views.addFriend);
 app.post('/removefriend', views.removeFriend);
 app.post('/gift', views.giftItem);
+app.post('/vendorList', views.getVendorList);
 
 
 app.listen(port);

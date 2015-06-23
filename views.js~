@@ -410,9 +410,17 @@ exports.giftItem = function(req, res) {
     var upc = req.body.upc;
     var event_id = req.body.event_id;
     var quantity = req.body.quantity;
+    var wantQuantity = req.body.wantQuantity;
     if(event_id == "General") {
         event_id = null;
     }
     res.redirect("/gift");
+};
+
+exports.getVendorList = function(req, res) {
+    console.log(req.body);
+    var itemVends = req.body.itemVends;
+    var event_id = req.body.event_id;
+    res.render("vendorlist", {vendors:itemVends, event_id = event_id});
 };
 
