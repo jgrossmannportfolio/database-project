@@ -94,19 +94,26 @@ var myapp = (function(){
         if(itemVend.discount) {
             console.log("price: "+itemVend.price);
             itemVend.price = (itemVend.price - (itemVend.price * 0.01 * itemVend.discount)).toFixed(2);
-            $("div."+event_id+" td#price."+itemVend.upc).text(itemVend.price).css("color", "red");
+            $("div."+event_id+" td.price."+itemVend.upc).text(itemVend.price).css("color", "red");
         } else {
-            $("div."+event_id+" td#price."+itemVend.upc).text(itemVend.price);
+            $("div."+event_id+" td.price."+itemVend.upc).text(itemVend.price);
         }
         callback(); 
     };
 
     var setVendorsLoop = function(itemVends, event_id, callback) {
-        for(i=0; i<itemVends.length; i++) {
-            $("div."+event_id+" td#vendorlist."+itemVends[i].upc).load("/vendorList", {itemVends:itemVends, event_id:event_id});
-            setPrice(event_id, itemVends[i], function() {});
-            if(i==itemVends.length) callback();
+        for(i=0; i<1; i++) {
+            (function(i) {
+                var upc = itemVends[i].upc;
+                $("div."+event_id+" td#vendorlist."+itemVends[i].upc+" select.vendor-list").empty().load("/vendorList", {itemVends:itemVends, event_id:event_id}, function() {
+                    $("div."+event_id+" form."+itemVends[i].upc+" input#vid").attr("value", upc);
+                });
+                setPrice(event_id, itemVends[i], function() {});
+                if(i==itemVends.length) callback();
+            })(i);
+           
         }   
+        
     };
 
     var updatePrice = function() {
@@ -123,16 +130,49 @@ var myapp = (function(){
         var upc = req.upc;
         var vid = req.vid;
         if(data.discount) {
-            data.price = data.price - (data.price * data.discount);
+            data.price = (data.price - (data.price * 0.01*data.discount)).toFixed(2);
             console.log("new discount: "+data.price);
-            $("div."+event_id+" td#price."+upc).text(data.price).css("color", "red");
+            $("div."+event_id+" td.price."+upc).text(data.price).css("color", "red");
         } else {
             console.log("price: "+data.price);
-            $("div."+event_id+" td#price."+upc).text(data.price).css("color", "black");
+            $("div."+event_id+" td.price."+upc).text(data.price).css("color", "black");
         }
     });
 
     
+    var selectAddress = function() {
+        var element = $(this);
+        if(element.hasClass("selected")) {
+            element.removeClass("selected");
+            $("input#a1").attr("value", '').addClass("error");
+            $("input#a2").attr("value", '').addClass("error");
+            $("input#city").attr("value", '').addClass("error");
+            $("input#state").attr("value", '').addClass("error");
+            $("input#zip").attr("value", '').addClass("error");
+        }else {
+            $("#selectAddress tr").each(function() {
+                if($(this).hasClass("selected")) {
+                    $(this).removeClass("selected");
+                }
+            });
+            element.addClass("selected");   
+            $("input#a1").attr("value", element.find("td.a1").text()).removeClass("error");
+            $("input#a2").attr("value", element.find("td.a2").text()).removeClass("error");
+            $("input#city").attr("value", element.find("td.city").text()).removeClass("error");
+            $("input#state").attr("value", element.find("td.state").text()).removeClass("error");
+            $("input#zip").attr("value", element.find("td.zip").text()).removeClass("error"); 
+        }        
+    };
+
+    var toAddresses = function() {
+        window.location = "/shippingAddresses";
+    };
+
+    var addVendor = function() {
+        console.log("clicked");
+        console.log($("select#vendor-list").val());
+    };
+
     return {
         init: function() {
             //console.log("Client-side app starting up")
@@ -144,11 +184,23 @@ var myapp = (function(){
             jQuery("#additem button").click(addItem);
             jQuery('#datepicker').datepicker();
             jQuery('a.event-link').click(addVendors);
-            jQuery('.table').on('change', '#vendor-list', updatePrice);
+            jQuery('.table').on('change', '.vendor-list', updatePrice);
+            jQuery("button#toAddress").click(toAddresses);
+            jQuery('#selectAddress tr').click(selectAddress);
+            jQuery('button.buy-gift').click(addVendor);
             jQuery('#navbar a').filter(function() {
                 return this.href == window.location;
             }).parent().addClass('active');
             jQuery("#navbar a.dropdown-toggle").click(navSelect);
+            $(function() {
+                $("#expiration").datepicker({
+                    defaultDate: "+1m",
+                    minDate: "+1m",
+                    dateFormat: "yy-mm",
+                    changeMonth: true,
+                    numberOfMonths: 3,
+                });
+            });
             $(function() {
                 $( "#from" ).datepicker({
                   defaultDate: "+1w",
@@ -184,6 +236,7 @@ var myapp = (function(){
                         required: true,
                         minlength: 5,
                         maxlength: 5,
+                        number: true
                     }
                 },
                 errorPlacement: function(error, element) {
@@ -228,6 +281,53 @@ var myapp = (function(){
                     if($("#newevent input").hasClass("error") == false) {
                         $("#newevent button").attr("type", "submit");
                     }
+                }
+            });
+            
+            jQuery("form#newPayment").validate({
+                rules: {
+                    ccn: {
+                        minlength:16,
+                        maxlength:16,
+                        number: true
+                    },
+                    date_end: {
+                        required: true,
+                        date: true
+                    },
+                    a1: {
+                        required: true,
+                        minlength: 1
+                    },
+                    zip: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 5,
+                        number: true
+                    }
+                },
+                messages: {
+                    a1: {
+                        required: "Select a billing address, or create a new one"
+                    }
+                },
+                highlight: function(element) {
+                    //$("button#newPayment").attr("type", "button");
+                    $(element).removeClass('success').addClass('error');
+                },
+                success: function(label) {
+                    $(label).remove();
+                    var error = false;
+                    $("input").each(function() {
+                        console.log("loop iter");
+                        if($(this).hasClass("error")) {
+                            console.log('has error');
+                            //$("button#newPayment").attr("type", "submit");
+                        }else {
+                            console.log("no error");
+                            //$("button#newPayment").attr("type", "button");
+                        }
+                    });
                 }
             });
 

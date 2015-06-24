@@ -3,6 +3,7 @@ extends layout
 block content
     div.navspacer
     div#gift
+        input(type='hidden' name="idk" value="why" id='test')
         h4 Purchase a gift for one of your friends:
         h5#saletext *Red indicates sale price
         each events, email in friendEventItems
@@ -28,7 +29,7 @@ block content
                                         div(id='collapse'+id+friendHash[email].hash class='panel-collapse collapse event-list '+id)
                                             input(type='hidden' name='id'+id value=id class='event-list' id=id)
                                             input(type='hidden' name='email' value=email id='wanteremail')
-                                            .panel-body
+                                            div(class='panel-body' id=id)
                                                 table.table
                                                     thead
                                                         tr
@@ -41,21 +42,23 @@ block content
                                                     div(id=id)     
                                                         tbody(id=id)
                                                             each item in items
-                                                                tr
+                                                                tr(class=item.upc)
                                                                     form(name='gift-item' method='POST' action="/gift" class=item.upc)
                                                                         td= item.name
                                                                         td= item.quant
                                                                         td= item.min_age
                                                                         td
                                                                             input(type='number' name='quantity' min='1' max=item.quant value='1' class='quantity')
-                                                                        td(id='price' class=item.upc)
+                                                                        td(class='price '+item.upc)
                                                                         td(id='vendorlist' class=item.upc)
+                                                                            select(class='vendor-list' name='vid')
+                                                                                option(value='1') Vendors
                                                                         td          
                                                                             input(type='hidden' value=item.upc name='upc' class='upc')  
                                                                             input(type='hidden' value=email name='email')
                                                                             input(type='hidden' value=id name='event_id')  
                                                                             input(type='hidden' value=item.quant name='wantQuantity')  
-                                                                            input(type='hidden' value=item.min_age name='min_age')               
-                                                                            button(type='submit' class='item-remove') Buy Gift
+                                                                            input(type='hidden' value=item.min_age name='min_age')  
+                                                                            button(type='submit' class='buy-gift') Buy Gift
                                      
                             

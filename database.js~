@@ -223,6 +223,18 @@ var getAllItems = function(callback) {
 }
 exports.getAllItems = getAllItems;
 
+var checkForItem = function(upc, event_id, callback) {
+    var email = currentUser.email;
+    db.query("SELECT * FROM wants W WHERE W.upc = ? AND W.email = ? AND W.event_id = ?", [upc, email, event_id], function(err, result) {
+        if(err) {
+            console.log(err);
+            callback(err, null);
+        }else {
+            callback(null, result);
+        }
+    });
+}
+
 var addItem = function(req) {
     var want = new Want(currentUser.email, req.data.upc, req.data.event_id, req.data.quant);
     var upc = req.data.upc;
@@ -236,14 +248,37 @@ var addItem = function(req) {
         req.io.emit('Added Item', {alert:"One or more of the required fields is null"});
         return;
     }else {
-        db.query('INSERT INTO wants set ?', want, function(err, rows) {
+        checkForItem(upc, event_id, function(err, result) {
             if(err) {
-                console.log('Query Error');
+                console.log(err);
                 req.io.emit('Added Item', {alert:""+err});
             }else {
-                req.io.emit('Added Item', {});
+                if(result.length == 0) {
+                    db.query('INSERT INTO wants set ?', want, function(err, rows) {
+                        if(err) {
+                            console.log('Query Error');
+                            req.io.emit('Added Item', {alert:""+err});
+                        }else {
+                            req.io.emit('Added Item', {alert:"Successfully added item"});
+                        }
+                    });
+                }else {
+                    console.log(result);
+                    var quantity = parseInt(result[0].quant) + parseInt(quant);
+                    console.log(quantity);
+                    var query = 'UPDATE wants set ? WHERE upc = ? AND email = ? AND event_id = ?';
+                    db.query(query, [{quant:quantity}, upc, currentUser.email, event_id], function(err, rows) {
+                        if(err) {
+                            console.log(err);
+                            req.io.emit('Added Item', {alert:""+err});
+                        }else {
+                            req.io.emit('Added Item', {alert:"Successfully added item"});
+                        }
+                    });
+                }
             }
         });
+        
     }
 }
 exports.addItem = addItem;
@@ -596,32 +631,107 @@ var addAddress = function(a1, a2, city, state, zip, callback) {
 }
 exports.addAddress = addAddress;         
 
-var updateWant = function(wanter, upc, event_id, quantity, wantQuantity, callback) {
-    var quant = wantQuantity - quantity;
-    if(quant == 0) {
-        console.log("removing item");
-        removeItem(wanter, upc, function(err, data) {
-            if(err) {
-                console.log(err);
-                callback(err);
-            }else {
-                console.log("removed");
-                console.log(data);
-                callback(null);
-            }
-        });
+var buyItem = function(wanter, upc, vid, quantity, callback) {
+    gifter = currentUser.email;
+    db.query('INSERT INTO buys set = ?', {gifter:gifter, wanter:wanter, upc:upc, vid:vid, quant:quantity}, function(err, rows) {
+        if(err) {
+            console.log(err);
+            callback(err);
+        }else {
+            callback(null);
+        }
+    });
+};
+
+var updateWant = function(wanter, upc, event_id, quantity, wantQuantity, min_age, vid, callback) {
+    var age = currentUser.age;
+    if(age < min_age) {
+        console.log("Too young to purchase");
+        callback("You must be at least: "+min_age+" to purchase this item");
     }else {
-        var query = 'UPDATE wants set ? WHERE upc = ? AND email = ?';
-        db.query(query, [{quant:quant}, upc, wanter], function(err, rows) {
-            if(err) {
-                console.log(err);
-                callback(err);
-            }else {
-                callback(null);
-            }
-        });
+        var quant = wantQuantity - quantity;
+        if(quant == 0) {
+            console.log("removing item");
+            removeItem(wanter, upc, function(err, data) {
+                if(err) {
+                    console.log(err);
+                    callback(err);
+                }else {
+                    console.log("removed");
+                    console.log(data);
+                    buyItem(wanter, upc, vid, quantity, function(err) {
+                        if(err) {
+                            console.log(err);
+                            callback(err);
+                        }else {
+                            callback(null);
+                        }
+                    });
+                }
+            });
+        }else {
+            if(event_id == "General") event_id = null;
+            var query = 'UPDATE wants set ? WHERE upc = ? AND email = ? AND event_id = ?';
+            db.query(query, [{quant:quant}, upc, wanter, event_id], function(err, rows) {
+                if(err) {
+                    console.log(err);
+                    callback(err);
+                }else {
+                    buyItem(wanter, upc, vid, quantity, function(err) {
+                        if(err) {
+                            console.log(err);
+                            callback(err);
+                        }else {
+                            callback(null);
+                        }
+                    });
+                }
+            });
+        }
     }
 }
-exports.updateWant = updateWant;      
+exports.updateWant = updateWant;    
+
+var getPaymentMethods = function(callback) {
+    var email = currentUser.email;
+    var query = 'SELECT * FROM Payment WHERE email = ?';
+    db.query(query, email, function(err, rows) {
+        if(err){
+            console.log(err);
+            callback(err, null);
+        }else {
+            callback(null, rows);
+        }
+    });
+}  
+exports.getPaymentMethods = getPaymentMethods;
+
+var addPaymentMethod = function(payment, callback) {
+    payment.email = currentUser.email;
+    var query = 'INSERT INTO Payment set ?';
+    db.query(query, payment, function(err, rows) {
+        if(err) {
+            console.log(err);
+            callback(err);
+        }else {
+            callback(null);
+        }
+    });
+}
+exports.addPaymentMethod = addPaymentMethod;
+
+var removePaymentMethod = function(ccn, callback) {
+    var query = 'DELETE FROM Payment WHERE ccn = ?';
+    db.query(query, ccn, function(err, rows) {
+        if(err) {
+            console.log(err);
+            callback(err);
+        }else {
+            callback(null);
+        }
+    });
+}
+exports.removePaymentMethod = removePaymentMethod;
+
                         
 

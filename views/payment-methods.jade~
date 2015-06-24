@@ -1,0 +1,35 @@
+extends layout
+
+block content
+    div.navspacer
+   
+    h3 Payment Methods
+    table.table.table-hover.table-bordered
+        thead
+            tr
+                th CCN
+                th Card Type
+                th Exp Date
+                th Address 1
+                th Address 2
+                th City
+                th State
+                th Zip
+                
+        tbody
+            each payment in payments
+                tr
+                    td= payment.ccn
+                    td= payment.card_type
+                    td= payment.date_end
+                    td= payment.a1
+                    td= payment.a2
+                    td= payment.city
+                    td= payment.state
+                    td= payment.zip
+                    td          
+                        form(name='removePaymentMethod' method='POST' action="/removePaymentMethod")
+                            input(type='hidden' value=payment.ccn name='ccn')                                      
+                            button(type='submit' class='payment-remove') Remove
+    form(action="/addPaymentMethod")                      
+        button(type='submit') Add Payment Method

@@ -49,7 +49,7 @@ margin-left: 10px;
 margin-right: 10px;
 }
 
-#remove-users .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
 background-color: #6699FF;
 }
 
@@ -143,5 +143,14 @@ margin-left: 3%;
 }
 
 button#newAddress {
+margin-left: 3%
+}
+
+#newPayment.input-group {
+display:inline-block;
+margin-left: 3%;
+}
+
+button#newPayment {
 margin-left: 3%
 }

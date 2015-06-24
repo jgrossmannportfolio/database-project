@@ -52,6 +52,8 @@ app.get('/friends', views.friends);
 app.get('/addfriend', views.addFriendIndex);
 app.get('/orderhistory', views.getOrderHistory);
 app.get('/shippingAddresses', views.getShippingAddresses);
+app.get('/paymentmethods', views.getPaymentMethods);
+app.get("/addPaymentMethod", views.addPaymentIndex);
 
 app.post('/new-user', views.createNewUser);
 app.post('/remove-user', views.deleteUsers);
@@ -64,6 +66,8 @@ app.post('/gift', views.giftItem);
 app.post('/vendorList', views.getVendorList);
 app.post('/removeAddress', views.removeAddress);
 app.post("/newAddress", views.addAddress);
+app.post("/newPayment", views.addPayment);
+app.post("/removePaymentMethod", views.removePaymentMethod);
 
 
 app.listen(port);

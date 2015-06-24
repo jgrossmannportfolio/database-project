@@ -1,0 +1,55 @@
+extends layout
+
+block content
+    div.navspacer
+   
+    form(id='newPayment' action='/newPayment' method='POST')  
+        #newPayment.input-group
+            label(for='ccn') Credit Card Number
+            input(type='text' class='form-control error' placeholder='xxxxxxxxxxxxxxxx' aria-describedby='basic-addon2' name='ccn')
+        #newPayment.input-group
+            label(for='card_type') Address 1
+            select(name='card_type' form='newPayment' class='form-control')
+                option(value="MasterCard") MasterCard
+                option(value="Visa") Visa
+                option(value="Amex") American Express
+        #newPayment.input-group
+            label(for='date_end') Exp Date
+            input(type='date' id='expiration' class='form-control error' placeholder='Expiration' name='date_end')   
+        input(id='a1' type='hidden' value=firstAddress.a1 name='a1' class='error')      
+        input(id='a2' type='hidden' value=firstAddress.a2 name='a2' class='error')
+        input(id='city' type='hidden' value=firstAddress.city name='city' class='error')
+        input(id='state' type='hidden' value=firstAddress.state name='state' class='error')
+        input(id='zip' type='hidden' value=firstAddress.zip  name='zip' class='error')
+        br
+        br
+        h3 Select a billing address for this payment information
+        table.table.table-hover.table-bordered#selectAddress
+            thead
+                tr
+                    th Address 1
+                    th Address 2
+                    th City
+                    th State
+                    th Zip
+                    
+            tbody
+                    tr.selected 
+                        td.a1= firstAddress.a1
+                        td.a2= firstAddress.a2
+                        td.city= firstAddress.city
+                        td.state= firstAddress.state
+                        td.zip= firstAddress.zip
+                    
+                each address in addresses
+                    tr
+                        td.a1= address.a1
+                        td.a2= address.a2
+                        td.city= address.city
+                        td.state= address.state
+                        td.zip= address.zip
+        button(type='button' id='toAddress') Add an Address
+        br       
+        br
+        button(type='submit' class='btn btn-default' id='newPayment') Add Payment Info
+    

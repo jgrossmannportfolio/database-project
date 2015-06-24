@@ -91,7 +91,7 @@ margin-left: 15px;
 }
 
 .navspacer {
-
+height: 4%;
 }
 
 #new-event {
@@ -143,5 +143,14 @@ margin-left: 3%;
 }
 
 button#newAddress {
+margin-left: 3%
+}
+
+#newPayment.input-group {
+display:inline-block;
+margin-left: 3%;
+}
+
+button#newPayment {
 margin-left: 3%
 }

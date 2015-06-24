@@ -401,7 +401,9 @@ exports.removeFriend = function(req, res) {
 }   
 
 exports.giftItem = function(req, res) {
+    console.log("gift function");
     console.log(req.body);
+    var vid = req.body.vid;
     var wanter = req.body.email;
     var upc = req.body.upc;
     var event_id = req.body.event_id;
@@ -411,7 +413,7 @@ exports.giftItem = function(req, res) {
     if(event_id == "General") {
         event_id = null;
     }
-    database.updateWant(wanter, upc, event_id, quantity, wantQuantity, min_age, function(err) {
+    database.updateWant(wanter, upc, event_id, quantity, wantQuantity, min_age, vid, function(err) {
         if(err) {
             console.log(err);
             req.flash("alert", ""+err);
@@ -448,6 +450,7 @@ exports.getOrderHistory = function(req, res) {
                     req.flash("alert", ""+err);
                     res.redirect("/settings");
                 }else {
+                    console.log(util.inspect(orders, false, null));
                     res.render('orderhistory', {title: "Database Project", user:user, users:users, orders:orders, headerPhrase:phrase, alert:req.flash("alert")});
                 }
             });
@@ -508,7 +511,102 @@ exports.addAddress = function(req, res) {
     }); 
 }
 
+
 exports.getPaymentMethods = function(req, res) {
-    res.redirect("/settings");
+    getUserData(function(err, data) {
+        if(err) {
+            console.log(err);
+            res.redirect("/");
+            return;
+        }else{
+            user = data.user.name;
+            phrase = "Hello, "+user;
+            users = data.users;
+            database.getPaymentMethods(function(err, payments) {
+                if(err) {
+                    console.log(err);
+                    req.flash("alert", ""+err);
+                    res.redirect("/settings");
+                }else {
+                    res.render('payment-methods', {title: "Database Project", user:user, users:users, payments:payments, headerPhrase:phrase, alert:req.flash("alert")});
+                }
+            });
+        }
+    });
+}   
+
+exports.addPaymentIndex = function(req, res) {
+    getUserData(function(err, data) {
+        if(err) {
+            console.log(err);
+            res.redirect("/");
+            return;
+        }else{
+            user = data.user.name;
+            phrase = "Hello, "+user;
+            users = data.users;
+            database.getShippingAddresses(function(err, addresses) {
+                if(err) {
+                    console.log(err);
+                    req.flash("alert", ""+err);
+                    res.redirect("/paymentmethods");
+                }else {
+                    if(addresses.length == 0) {
+                        req.flash("alert", "You have no addresses on  file. You must create one first");
+                        res.render("/shippingAddresses");
+                    }else {
+                        console.log("got shipping addresses, rendering add payment index");
+                        var firstAddress = addresses[0];
+                        addresses.shift();
+                        res.render('addpaymentmethod', {title: "Database Project", user:user, users:users, addresses:addresses, firstAddress:firstAddress, headerPhrase:phrase, alert:req.flash("alert")});
+                    }
+                }
+            });
+        }
+    });
+}
+
+exports.addPaymentMethod = function(req, res) {
+    console.log(req);
+    var ccn = req.body.ccn;
+    var card_type = req.body.card_type;
+    var date_end = req.body.date_end + "-01"
+    console.log(date_end);
+    var a1 = req.body.a1;
+    var a2 = req.body.a2;
+    var city = req.body.city;
+    var state = req.body.state;
+    var zip = req.body.zip;
+    if(card_type == null || date_end == null || a1 == null || city == null || state == null || zip == null) {
+        console.log("one or more of the values was null, can't add payment");
+        req.flash("alert", "one or more of the values was null, can't add payment");
+        res.redirect("/paymentmethods");
+    }else {
+        var payment = {ccn:ccn, card_type:card_type, date_end:date_end, a1:a1, a2:a2, city:city, state:state, zip:zip};
+        database.addPaymentMethod(payment, function(err) {
+            if(err) {
+                console.log(err);
+                req.flash("alert", ""+err);
+                res.redirect("/paymentmethods");
+            }else {
+                req.flash("alert", "Successfully added payment method");
+                res.redirect("/paymentmethods");
+            }
+        });
+    }
+}
+
+exports.removePaymentMethod = function(req, res) {
+    var ccn = req.body.ccn;
+    database.removePaymentMethod(ccn, function(err) {
+        if(err) {
+            console.log(err);
+            req.flash("alert", ""+err);
+            res.redirect("/paymentmethods");
+        }else {
+            req.flash("alert", "Successfully removed payment method");
+            res.redirect("/paymentmethods");
+        }
+    });
 }
 

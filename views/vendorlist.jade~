@@ -1,3 +1,3 @@
 select#vendor-list
     each vendor in vendors
-        option(value=vendor.name class=vendor.upc id=vendor.vid) #{vendor.name}
+        option(value=vendor.vid class=vendor.upc id=vendor.vid) #{vendor.name}
