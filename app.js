@@ -13,6 +13,7 @@ if (process.env.PORT) {
 console.log("Using baseurl: " + baseurl);
 console.log("Port: " + port);
 
+//configure app extras
 var flash = require('connect-flash');
 app.configure(function() {
   app.set('view engine', 'jade');

@@ -4,6 +4,7 @@ var HOME = __dirname+"/../";
 var util = require("util");
 var encode = require("hashcode").hashCode;
 
+//connect to mysql database
 var mysql = require('mysql');
 var db = mysql.createConnection({
 	host : 'cs4111.cyiqnfca9p2n.us-west-2.rds.amazonaws.com',
@@ -53,7 +54,7 @@ function Address(email, a1, a2, city, state, zip) {
     this.zip = zip;
 }
 
-
+//for testing purposes
 var test_database = function(req) {
 	//db.connect();
 
@@ -75,11 +76,14 @@ var test_database = function(req) {
 };
 exports.test_database = test_database;
 
+//returns results of database test
 var getTestData = function(req) {
 	return testData
 };
 exports.getTestData = getTestData;
 
+
+//get list of all users in database
 var getAllUsers = function(callback) {
     var users = null;
     console.log("database: getting users");
@@ -100,6 +104,7 @@ var getAllUsers = function(callback) {
 exports.getAllUsers = getAllUsers;
 
 
+//get the user who is logged on
 var getCurrentUser = function(callback) {
     if(currentUser === null) {
         console.log("getCurrentUser: no current user");
@@ -111,6 +116,7 @@ var getCurrentUser = function(callback) {
 }
 exports.getCurrentUser = getCurrentUser;
 
+//changes the logged on user
 var setCurrentUser = function(req) {
     var newEmail = req.data.email;
     var allUsers = getAllUsers(function(err, data) {
@@ -134,6 +140,7 @@ var setCurrentUser = function(req) {
 }
 exports.setCurrentUser = setCurrentUser;
 
+//creates a new user in database
 var createNewUser = function(req, callback) {
     var user = new Person(req.email1+"@"+req.email2, req.name, req.age);
     db.query('INSERT INTO Person set ?', user, function(err, rows) {
@@ -148,6 +155,7 @@ var createNewUser = function(req, callback) {
 }
 exports.createNewUser = createNewUser;
 
+//removes user info from database
 var removeUsers = function(data, callback) {
     var error = null;
     for(i=0; i<data.length; i++) {
@@ -177,6 +185,7 @@ var removeUsers = function(data, callback) {
 }   
 exports.removeUsers = removeUsers;
 
+//get events of a user
 var getUserEvents = function(email, callback) {
     console.log("getting user events");
     db.query('Select * FROM Event WHERE email = ?', email, function(err, rows) {
@@ -194,6 +203,7 @@ var getUserEvents = function(email, callback) {
 }
 exports.getUserEvents = getUserEvents;
 
+
 var getEventItems = function(eventId, callback) {
     db.query('Select * FROM wants W, Item I WHERE W.upc = I.upc AND W.event_id = ?', eventId, function(err, rows) {
         if (err) {
@@ -209,6 +219,7 @@ var getEventItems = function(eventId, callback) {
 }
 exports.getEventItems = getEventItems;
 
+
 var getAllItems = function(callback) {
     db.query('Select * FROM Item', function(err, rows) {
         if(err) {
@@ -223,6 +234,7 @@ var getAllItems = function(callback) {
 }
 exports.getAllItems = getAllItems;
 
+
 var checkForItem = function(upc, event_id, callback) {
     var email = currentUser.email;
     db.query("SELECT * FROM wants W WHERE W.upc = ? AND W.email = ? AND W.event_id = ?", [upc, email, event_id], function(err, result) {
@@ -234,6 +246,8 @@ var checkForItem = function(upc, event_id, callback) {
         }
     });
 }
+
+
 
 var addItem = function(req) {
     var want = new Want(currentUser.email, req.data.upc, req.data.event_id, req.data.quant);
@@ -247,31 +261,39 @@ var addItem = function(req) {
     if(upc == null || quant == null || currentUser.email == null) {
         req.io.emit('Added Item', {alert:"One or more of the required fields is null"});
         return;
-    }else {
+    }
+    else {
         checkForItem(upc, event_id, function(err, result) {
+            
             if(err) {
                 console.log(err);
                 req.io.emit('Added Item', {alert:""+err});
-            }else {
+            }
+            else {
                 if(result.length == 0) {
                     db.query('INSERT INTO wants set ?', want, function(err, rows) {
+                        
                         if(err) {
                             console.log('Query Error');
                             req.io.emit('Added Item', {alert:""+err});
-                        }else {
+                        }
+                        else {
                             req.io.emit('Added Item', {alert:"Successfully added item"});
                         }
                     });
-                }else {
+                }
+                else {
                     console.log(result);
                     var quantity = parseInt(result[0].quant) + parseInt(quant);
                     console.log(quantity);
                     var query = 'UPDATE wants set ? WHERE upc = ? AND email = ? AND event_id = ?';
                     db.query(query, [{quant:quantity}, upc, currentUser.email, event_id], function(err, rows) {
+                    
                         if(err) {
                             console.log(err);
                             req.io.emit('Added Item', {alert:""+err});
-                        }else {
+                        }
+                        else {
                             req.io.emit('Added Item', {alert:"Successfully added item"});
                         }
                     });
@@ -282,6 +304,7 @@ var addItem = function(req) {
     }
 }
 exports.addItem = addItem;
+
 
 var getUserGeneralItems = function(email, callback) {
     db.query('SELECT * FROM Item I, wants W WHERE I.upc = W.upc AND W.event_id IS NULL AND W.email = ?', email, function(err, rows) {
@@ -294,6 +317,8 @@ var getUserGeneralItems = function(email, callback) {
     });
 }
 exports.getUserGeneralItems = getUserGeneralItems;
+
+
 
 var removeItem = function(email, upc, callback) {
     if(email == null) {
@@ -311,6 +336,8 @@ var removeItem = function(email, upc, callback) {
     });
 }
 exports.removeItem = removeItem;
+
+
 
 var newEvent = function(e_name, start_date, end_date, callback) {
     var email = currentUser.email;
@@ -331,6 +358,8 @@ var newEvent = function(e_name, start_date, end_date, callback) {
 }
 exports.newEvent = newEvent;
 
+
+
 var getFriends = function(callback) {
     var email = currentUser.email;
     db.query('SELECT P.name, P.email FROM is_friend F, Person P WHERE F.wanter = P.email AND F.gifter = ?', email, function(err, rows) {
@@ -343,6 +372,8 @@ var getFriends = function(callback) {
     });
 }
 exports.getFriends = getFriends;
+
+
 
 var getNonFriends = function(callback) {
     var email = currentUser.email;
@@ -371,6 +402,8 @@ var addFriend = function(wanter, callback) {
 }
 exports.addFriend = addFriend;
 
+
+
 var removeFriend = function(wanter, callback) {
     var gifter = currentUser.email;
     db.query('DELETE FROM is_friend WHERE wanter = ? AND gifter = ?', [wanter, gifter], function(err, rows) {
@@ -385,6 +418,7 @@ var removeFriend = function(wanter, callback) {
 exports.removeFriend = removeFriend;
 
 
+//get all items for all events of each friend
 var getFriendData = function(otherCallBack) {
     async.waterfall([
         function(callback) {
@@ -456,6 +490,8 @@ var getFriendData = function(otherCallBack) {
 }
 exports.getFriendData = getFriendData;
 
+
+
 var getFriendEmailHash = function(callback) {
     friendHash = {};
     getFriends(function(err, friends) {
@@ -475,6 +511,8 @@ var getFriendEmailHash = function(callback) {
 }
 exports.getFriendEmailHash = getFriendEmailHash;
 
+
+//gets the item vendors for an event
 var getItemVendForEvent = function(req) {
     var event_id = req.data.event_id;
     var itemVendors = {};
@@ -537,6 +575,8 @@ var getItemVendForEvent = function(req) {
 }
 exports.getItemVendForEvent = getItemVendForEvent;
 
+
+//gets all item vendors for all of a users events
 var getItemVend = function(req) {
     console.log("getting item vend");
     var vid = req.data.vid;
@@ -557,6 +597,8 @@ var getItemVend = function(req) {
     });
 };
 exports.getItemVend = getItemVend;
+
+
 
 var getOrderHistory = function(callback) {
     var email = currentUser.email;
@@ -600,6 +642,8 @@ var getShippingAddresses = function(callback) {
 }
 exports.getShippingAddresses = getShippingAddresses;
 
+
+
 var removeAddress = function(a1, a2, city, state, zip, callback) {
     var email = currentUser.email;
     var address = [email, a1, a2, city, state, zip];
@@ -614,6 +658,8 @@ var removeAddress = function(a1, a2, city, state, zip, callback) {
     });
 }
 exports.removeAddress = removeAddress;
+  
+  
     
 var addAddress = function(a1, a2, city, state, zip, callback) {
     var email = currentUser.email;
@@ -631,6 +677,8 @@ var addAddress = function(a1, a2, city, state, zip, callback) {
 }
 exports.addAddress = addAddress;         
 
+
+
 var buyItem = function(wanter, upc, vid, quantity, callback) {
     gifter = currentUser.email;
     db.query('INSERT INTO buys set ?', {gifter:gifter, wanter:wanter, upc:upc, vid:vid, quant:quantity}, function(err, rows) {
@@ -642,6 +690,8 @@ var buyItem = function(wanter, upc, vid, quantity, callback) {
         }
     });
 };
+
+
 
 var updateWant = function(wanter, upc, event_id, quantity, wantQuantity, min_age, vid, callback) {
     var age = currentUser.age;
@@ -692,6 +742,8 @@ var updateWant = function(wanter, upc, event_id, quantity, wantQuantity, min_age
 }
 exports.updateWant = updateWant;    
 
+
+
 var getPaymentMethods = function(callback) {
     var email = currentUser.email;
     var query = 'SELECT * FROM Payment WHERE email = ?';
@@ -706,6 +758,8 @@ var getPaymentMethods = function(callback) {
 }  
 exports.getPaymentMethods = getPaymentMethods;
 
+
+
 var addPaymentMethod = function(payment, callback) {
     payment.email = currentUser.email;
     var query = 'INSERT INTO Payment set ?';
@@ -719,6 +773,8 @@ var addPaymentMethod = function(payment, callback) {
     });
 }
 exports.addPaymentMethod = addPaymentMethod;
+
+
 
 var removePaymentMethod = function(ccn, callback) {
     var query = 'DELETE FROM Payment WHERE ccn = ?';

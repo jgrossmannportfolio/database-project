@@ -413,7 +413,7 @@ exports.giftItem = function(req, res) {
     if(event_id == "General") {
         event_id = null;
     }
-    /*database.updateWant(wanter, upc, event_id, quantity, wantQuantity, min_age, vid, function(err) {
+    database.updateWant(wanter, upc, event_id, quantity, wantQuantity, min_age, vid, function(err) {
         if(err) {
             console.log(err);
             req.flash("alert", ""+err);
@@ -422,7 +422,7 @@ exports.giftItem = function(req, res) {
             req.flash("alert", "Successfully purchased gift");
             res.redirect("/gift");
         }
-    });*/
+    });
 };
 
 exports.getVendorList = function(req, res) {

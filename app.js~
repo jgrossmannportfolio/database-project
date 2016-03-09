@@ -66,7 +66,7 @@ app.post('/gift', views.giftItem);
 app.post('/vendorList', views.getVendorList);
 app.post('/removeAddress', views.removeAddress);
 app.post("/newAddress", views.addAddress);
-app.post("/newPayment", views.addPayment);
+app.post("/newPayment", views.addPaymentMethod);
 app.post("/removePaymentMethod", views.removePaymentMethod);
 
 

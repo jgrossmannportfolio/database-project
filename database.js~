@@ -633,7 +633,7 @@ exports.addAddress = addAddress;
 
 var buyItem = function(wanter, upc, vid, quantity, callback) {
     gifter = currentUser.email;
-    db.query('INSERT INTO buys set = ?', {gifter:gifter, wanter:wanter, upc:upc, vid:vid, quant:quantity}, function(err, rows) {
+    db.query('INSERT INTO buys set ?', {gifter:gifter, wanter:wanter, upc:upc, vid:vid, quant:quantity}, function(err, rows) {
         if(err) {
             console.log(err);
             callback(err);
